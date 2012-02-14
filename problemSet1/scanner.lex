@@ -545,6 +545,23 @@ int add_octal_to_string_buffer(const char* octalLiteral)
   return 1;
 }
 
+/* add_string_to_string_buffer
+
+   Appends a string value to the string_buffer.
+
+   Parameters   : string (const char*)
+                  - string to append to string_buffer
+
+                  length (const int)
+                  - length of provided string
+
+   Returns      : 1 if there isn't room in the string_buffer to hold
+                  the provided string.  0 otherwise.
+
+   Side-effects : The string_buffer_cursor is moved by the length of
+                  the added string.  The string is copied into the 
+                  string_buffer.
+*/
 int add_string_to_string_buffer(const char* string, const int length)
 {
   if (remaining_buffer_capacity() > (length + 1))
@@ -556,6 +573,20 @@ int add_string_to_string_buffer(const char* string, const int length)
   return 1;
 }
 
+/* make_string
+
+   Creates a new string_t and populates it with information about 
+   the string_buffer.  
+
+   Parameters   : none
+   Returns      : New string_t containing pointer to string_buffer
+                  as well as length and size data about string_buffer.
+                  NULL if a new string_t cannot be allocated.
+
+   Side-effects : Allocates memory on the heap.
+                  Increments string_buffer_cursor.
+                  Modifies string_buffer to add a terminating '\0'
+*/
 string_t* make_string()
 {
   string_t* string = malloc(sizeof(string_t));
