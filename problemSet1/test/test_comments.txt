@@ -1,0 +1,21 @@
+/* This file tests comments */
+break do breakdo break/**/do /*
+
+
+
+      this is all 
+   
+
+    comment land   "   '  \0999
+
+
+  it will all be thrown out  
+
+     .  **** 
+   **
+      ***lires/    ***
+/ *** still in the comment! **/_identifier
+
+/* /* */ */
+
+/* This comment is unterminated **
