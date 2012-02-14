@@ -2,7 +2,16 @@
 # Justin Voshell - jvoshell@me.com
 # CSCI E295 Spring 2012
 
-.PHONY : all clean test
+# 'all' builds the executable 'scannerCLI' from the generated scanner and the
+#       scanner_codes facility.
+#
+# 'clean' removes all output, including 'scannerCLI'
+#
+# 'test' runs my test suite
+#
+# 'section_test' runs the example test suite we were provided in section.
+
+.PHONY : all clean test section_test
 
 all : scannerCLI
 scannerCLI : scanner.o scanner_codes.o scannerCLI.o
@@ -24,18 +33,61 @@ clean :
 	rm -f *~ *#
 
 test :
-	cat test/test_all_keywords.txt
-	./scannerCLI test/test_all_keywords.txt
-	cat test/test_all_operators.txt
-	./scannerCLI test/test_all_operators.txt
-	cat test/test_characters.txt
-	./scannerCLI test/test_characters.txt
-	cat test/test_comments.txt
-	./scannerCLI test/test_comments.txt
-	cat test/test_identifiers.txt
-	./scannerCLI test/test_identifiers.txt
-	cat test/test_numbers.txt
-	./scannerCLI test/test_numbers.txt
-	cat test/test_strings.txt
-	./scannerCLI test/test_strings.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "KEYWORD TEST TEXT:\n\n"
+	@cat test/test_all_keywords.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "KEYWORD TEST RESULTS:\n\n"
+	@./scannerCLI test/test_all_keywords.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "OPERATORS TEST TEXT:\n\n"
+	@cat test/test_all_operators.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "OPERATORS TEST RESULTS:\n\n"
+	@./scannerCLI test/test_all_operators.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "CHARACTERS TEST TEXT:\n\n"
+	@cat test/test_characters.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "CHARACTERS TEST RESULTS:\n\n"
+	@./scannerCLI test/test_characters.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "COMMENTS TEST TEXT:\n\n"
+	@cat test/test_comments.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "COMMENTS TEST RESULTS:\n\n"
+	@./scannerCLI test/test_comments.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "IDENTIFIERS TEST TEXT:\n\n"
+	@cat test/test_identifiers.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "IDENTIFIERS TEST RESULTS:\n\n"
+	@./scannerCLI test/test_identifiers.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "NUMBERS TEST TEXT:\n\n"
+	@cat test/test_numbers.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "NUMBERS TEST RESULTS:\n\n"
+	@./scannerCLI test/test_numbers.txt
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "STRINGS TEST TEXT:\n\n"
+	@cat test/test_strings.txt
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "STRINGS TEST RESULTS:\n\n"
+	@./scannerCLI test/test_strings.txt
+
+section_test:
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "2009 TEST TEXT:\n\n"
+	@cat test/Willenson_lexer_2009.c
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "2009 TEST RESULTS:\n\n"
+	@./scannerCLI test/Willenson_lexer_2009.c
+	@echo "\n\n--------------------------------------------------------------------------------"
+	@echo "2010 TEST TEXT:\n\n"
+	@cat test/Willenson_lexer_2010.c
+	@echo "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "2010 TEST RESULTS:\n\n"
+	@./scannerCLI test/Willenson_lexer_2010.c
+
 
