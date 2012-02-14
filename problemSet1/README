@@ -1,0 +1,145 @@
+Problem Set 1
+Justin Voshell - justin.voshell@me.com
+CSCI E-295 Spring 2012
+--------------------------------------------------------------------------------
+
+A scanner for our subset of the C language has been implemented using a flex 
+scanner description.  A command-line utility for driving the scanner has been
+implemented as well.
+
+To build: 'make all' (or, simply 'make')
+
+make all:
+- builds a scanner from the flex source code in scanner.lex
+- builds a small facility for decoding coded token values and error messages
+  from scanner_codes.c
+- builds a command-line interface for driving the scanner called 'scannerCLI'
+
+Using scannerCLI
+- - - - - - - - -
+
+scannerCLI usage:
+  scannerCLI [input_file] [output_file]
+
+If no input_file is provided, or if "-" is provided as the input file, stdin is
+used.  Similarly, if no output-file is provided, or if "-" is provided as the 
+output file, stdout is used.
+
+scannerCLI scans the input file and prints a line to output for each token or 
+error message returned by the scanner.  each line of output begins with:
+
+<input_filename>:<input_line_number>: TEXT:<input_text>
+
+<input_text> is the text that triggered the scanner to report a token.  For non-
+quoted tokens, such as keywords, identifiers, and numbers, <input_text> will be
+the full lexeme corresponding to the returned token.  For quoted tokens, such as
+strings, the <input_text> may just be the final quote character.  If <input_text>
+is overly long, it is output on its own line in this way:
+
+TEXT==><input_text><==TEXT
+
+<input_text> that contains formatting characters such as new line, vertical tab,
+form feed, etc. may appear across multiple lines.
+
+Next, scannerCLI reports the token returned by the scanner.  Token types that do
+not carry an attribute value simply output their token type and value:
+
+KEYWORD: BREAK
+OPERATOR: EQUALS
+SEPARATOR: LEFT_BRACE
+
+etc.
+
+Token types that do carry attribute values also output their attribute data:
+
+IDENTIFIER: <identifier_name>
+INTEGER: <integer_value>  TYPE: (CHAR | SHORT | INT)  (NO OVERFLOW | OVERFLOW)
+STRING: <string_value>
+
+Errors returned from the scanner are reported as ERROR: <error_message>
+
+Running tests
+- - - - - - - 
+
+Test data is provided in /test.  To run all tests, use 'make test'.  The tests
+provided to us in section can also be run using 'make section_test'.
+
+
+Implementation Notes
+- - - - - - - - - - -
+scannerCLI.c is the source code for the command line utility.  The approach
+taken in scannerCLI is based on the scanner_main.c file we were provided in 
+section. Token attribute values that were malloc()'ed by the scanner are free()'d
+once they've been written to output.
+
+scanner_codes.h / scanner_codes.c  define the integer constants used as 
+token values and error codes.  Additionally, a facility is provided for encoding
+and decoding strings.  This is a slight expansion of the approach taken in the
+scanner_tokens.h / scanner_tokens.c files we were provided in section.
+
+scanner.h defines data structures for reporting integer and string token attribute
+values from the scanner.  integer_t carries the parsed integer value as well along
+with the type the scanner believes the integer should be stored in and a flag
+indicating whether there was overflow.  Values that result from overflow are
+always set to E295_INT_MAX, which is the largest unsigned 4 byte integer.
+
+scanner.lex is a flex file which defines the scanner.  This file is heavily 
+commented to describe the intent of each flex pattern.  The approach taken for
+scanning comments and strings was strongly influenced by the flex manual.
+
+Some notes on scanning:
+- Strings may be wrapped over multiple lines of source code via the C string 
+  continuation construct: a backslash followed immediately by a new line.
+
+- Characters and strings that are incorrectly terminated (because they contain
+  an unescaped new line for example) must eventually be terminated before
+  the scanner will resume recognizing tokens.  For example:
+
+'A' 'B
+ C D E
+' F G
+
+  will result in the following output:
+
+'A' 'B
+stdin:1: TEXT: 'A'                           	INTEGER: 65          	TYPE: INT   	NO OVERFLOW
+stdin:1: TEXT: B                             	ERROR: Invalid character literal
+stdin:2: TEXT: 
+                             	ERROR: Unterminated character literal
+ C D E
+stdin:2: TEXT:  C D E                        	ERROR: Invalid character literal
+stdin:3: TEXT: 
+                             	ERROR: Unterminated character literal
+' F G
+stdin:3: TEXT: F                             	IDENTIFIER: F
+stdin:3: TEXT: G                             	IDENTIFIER: G
+
+  I believe this to be the correct approach.
+
+- String literals generally report their input text to be the closing quote
+  character.  This is because yytext only reports the last match that resulted
+  in a token being reported.  So this input:
+
+"this is a string" "and this"
+"this is\
+ a string" "so is this."
+
+ will result in the following output:
+
+"this is a string" "and this"
+stdin:1: TEXT: "                             	STRING: this is a string
+stdin:1: TEXT: "                             	STRING: and this
+"this is\
+ a string" "so is this."
+stdin:3: TEXT: "                             	STRING: this is a string
+stdin:3: TEXT: "                             	STRING: so is this.
+
+- Character literals are reported as LITERAL_INTEGER tokens with type INT. 
+  However, their value may not exceed the maximum size of an unsigned char
+  which in our specification is 255. (\377).  Values over 255 are flagged
+  as having overflow and their value is set to 255.
+
+- String literals have a maximum size in this implementation of 64KB. In 
+  a future implementation I could grow the string buffer as needed to 
+  remove this limitation.
+
