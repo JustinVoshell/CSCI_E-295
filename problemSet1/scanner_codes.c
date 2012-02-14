@@ -14,11 +14,31 @@
    stringification.  This is used for error messages.
 */
 
+/* Store stringification of constant name at constant's value in 
+   _encoding array
+*/
 #define ENCODE(CODE) encoding_[CODE] = #CODE
+
+/* Store message at constant's value in _encoding array */
 #define ENCODE_MESSAGE(CODE, MESSAGE) encoding_[CODE] = MESSAGE
 
+/* Mapping of code values to string descriptions */
 char* encoding_[LAST_CODE + 1] = { NULL };
 
+/* decode
+  
+   Returns a string value associated with the provided code.
+   NOTE: init_code_table() must be called once before calling this function.
+
+   Parameters   : code (const int)
+                  - code value to fetch string for.  Should be a code
+                    defined in scanner_codes.h
+
+   Returns      : string value saved in table for code.
+                  NULL if no string value found.
+
+   Side-effects : none
+*/
 const char* decode(const int code)
 {
   if (IS(CODE, code)) {
@@ -28,6 +48,16 @@ const char* decode(const int code)
   return NULL;
 }
 
+/* init_code_table
+
+   Must be called once to load strings into code table.
+
+   Parameters   : none
+
+   Returns      : none
+
+   Side-effects : Modifies values in _encoding to point to string constants.
+*/
 void init_code_table()
 {  
   ENCODE(IDENTIFIER);

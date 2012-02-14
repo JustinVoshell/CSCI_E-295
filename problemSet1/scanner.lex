@@ -21,7 +21,8 @@
 
   #include "scanner.h"
   #include "scanner_codes.h"
-  
+
+  /* We use yyval to pass token attriute values to the client */  
   #define YYSTYPE void*
   extern YYSTYPE yylval;
 
@@ -96,7 +97,7 @@ num                 0|[1-9][[:digit:]]*
  /*
    Comments
    -----------------------------------------------------------------------------
-   This approach is follows the one used in the flex manual.  Comments may be
+   This approach follows the one used in the flex manual.  Comments may be
    arbitrarily long, so we match up to a line's worth at a time.  
  */
 
@@ -499,6 +500,20 @@ integer_t* make_integer_from_octal(const char* text)
   return integer;
 }
 
+/* initialize_string_buffer
+
+   Creates a new string buffer of size MAX_STR_LEN.  Resets the string buffer
+   cursor to point to the start of the buffer.
+
+   Parameters   : none
+
+   Returns      : 0 if the buffer can be allocated
+                  1 if the buffer cannot be allocated
+
+   Side-effects : Attempts to allocate memory on the heap
+                  Modifies address that string_buffer and string_buffer_cursor
+                  point to.
+ */
 int initialize_string_buffer()
 {
   if (!(string_buffer = malloc(MAX_STR_LEN*sizeof(char) + 1)))
@@ -509,6 +524,19 @@ int initialize_string_buffer()
   return 0;
 }
 
+/* remaining_buffer_capacity
+
+   Convenience function to calculate the number of characters that may be
+   appended to the string buffer before it is full.
+
+   Parameters   : none
+
+   Returns      : 0 if string_buffer is full or has not been allocated
+                  Otherwise, returns number of characters left in 
+                   string buffer.
+
+   Side-effects : none
+ */
 int remaining_buffer_capacity()
 {
   if (NULL == string_buffer)
@@ -518,6 +546,19 @@ int remaining_buffer_capacity()
   return MAX_STR_LEN - (string_buffer_cursor - string_buffer);
 }
 
+/* add_char_to_string_buffer
+
+   Appends a single character to the string buffer
+
+   Parameters   : charValue (const char)
+                  - character to append to string buffer
+
+   Returns      : 0 if character could be added, 
+                  1 if character could not be added
+
+   Side-effects : Memory at string_buffer_cursor may be changed,
+                  Value of string_buffer_cursor may change.
+*/
 int add_char_to_string_buffer(const char charValue)
 {
   if (remaining_buffer_capacity() > 1)
@@ -528,6 +569,22 @@ int add_char_to_string_buffer(const char charValue)
   return 1;
 }
 
+/* add_octal_to_string_buffer
+
+   Appends a single character to the string buffer.  Character is calculated
+   from an octal literal.
+
+   Parameters   : octalLiteral (const char*)
+                  - A valid octal literal that will be parsed into an integer
+                    value.  The integer value is then appended to the string
+                    buffer.
+
+   Returns      : 0 if character could be appended,
+                  1 if character could not be appended
+
+   Side-effects : Memory at string_buffer_cursor may be changed,
+                  value of string_buffer_cursor may change.
+*/
 int add_octal_to_string_buffer(const char* octalLiteral)
 {
   integer_t* integer;

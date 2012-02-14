@@ -87,10 +87,19 @@ void fprint_lexeme(FILE* output, const char* inputName, const char* lexeme, cons
  */
 int main(int argc, char** argv)
 {
+  /* Input source */
   FILE* input;
+
+  /* Output target */
   FILE* output;
   
+  /* Result of calling yylex() */
   int yylex_result;
+
+  /* Opens input and output files (or assigns them to stdin and/or stdout).
+     inputName is set to a string we can output to the user describing the 
+     input source.  This will either be 'stdin' or the input filename.
+  */
   const char* inputName = open_io(&input, argc < 2 ? NULL : argv[1], &output, argc < 3 ? NULL : argv[2]);
 
   /* Initialize code table defined in scanner_codes.h */
@@ -100,6 +109,7 @@ int main(int argc, char** argv)
   yyin = input;
   for (yylex_result = yylex(); 0 != yylex_result; yylex_result = yylex())
   {  
+    /* A zero result from yylex() means we've reached EOF */
     if (yylex_result !=0)
     {
       /* Print information about input text */
@@ -110,11 +120,13 @@ int main(int argc, char** argv)
       break;
     }
 
+    /* Handle tokens */
     if (IS(TOKEN, yylex_result))
     {
       if (handle_token(yylex_result, yylval, output)) return EXIT_OUT_OF_MEMORY;
     }
 
+    /* Handle errors */
     else if (IS(ERROR, yylex_result)) 
     {
       fprint_error(output, yylex_result);
@@ -166,6 +178,7 @@ int main(int argc, char** argv)
 */
 int handle_token(const int token, void* attribute, FILE* output)
 {
+  /* Decoded string name for token */
   const char* tokenName;
 
   if (!(tokenName = decode(token)))
@@ -185,13 +198,22 @@ int handle_token(const int token, void* attribute, FILE* output)
       fprint_error(output, E_OUT_OF_MEMORY);
       return EXIT_OUT_OF_MEMORY;
     }
-   
+
+    /*
+       Call the appropriate function to format and output the attribute value
+    */
     if (IDENTIFIER == token)            fprint_id(output, (char*)attribute); 
     else if (LITERAL_INTEGER == token)  fprint_integer_t(output, (integer_t*)attribute);
     else if (LITERAL_STRING == token)   fprint_string_t(output, (string_t*)attribute);
 
+    /*
+       Attribute values are allocated in the scanner, so we free them now that we've 
+       finished up with them.
+    */
     free(attribute);
   }
+
+  /* If there isn't an attribute, outputting the token value is easy */
   else if (IS(KEYWORD, token))          fprintf(output, "KEYWORD: %s\n", tokenName);
   else if (IS(OPERATOR, token))         fprintf(output, "OPERATOR: %s\n", tokenName);
   else if (IS(SEPARATOR, token))        fprintf(output, "SEPARATOR: %s\n", tokenName);
@@ -256,7 +278,16 @@ void fprint_integer_t(FILE* output, const integer_t* integer)
 */
 void fprint_string_t(FILE* output, const string_t* string) 
 {
+  /* Used as loop index */
   size_t idx;
+
+  /* We copy the string attribute value character by character instead of 
+     relying on standard C functions: they will stop at a NUL while we
+     want to copy out the entire attribute value.
+
+     We output the string inline if we can, otherwise we mark its beginning
+     and end and then dump the whole string.
+  */
   if (string->length <= MAX_INLINE_STRLEN)
   {
     fputs("STRING: ", output);
@@ -265,7 +296,6 @@ void fprint_string_t(FILE* output, const string_t* string)
       fputc(string->buffer[idx], output);
     }
     fputs("\n", output);
-      /*fprintf(output, "STRING: %s\n", string->buffer);*/
   }
   else
   {
@@ -275,7 +305,6 @@ void fprint_string_t(FILE* output, const string_t* string)
       fputc(string->buffer[idx], output);
     }
     fputs("<==STRING\n", output);
-/*    fprintf(output, "\nSTRING==>%s<==STRING\n", string->buffer);*/
   }
 }
 
@@ -295,7 +324,9 @@ void fprint_string_t(FILE* output, const string_t* string)
 */
 void fprint_error(FILE* output, const int errorCode)
 {
+  /* Decoded error message */
   const char* errorMessage;
+
   if ((errorMessage = decode(errorCode)))
   {
     fprintf(output, "ERROR: %s\n", errorMessage);
