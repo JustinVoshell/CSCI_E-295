@@ -1,0 +1,18 @@
+"this is a string"
+"this is \
+a string"
+"\\\\\\\\"
+"\\\\\\\\\."
+"this is a string""this is a string" 0123"This is a string"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\
+!#%^&*()-_+=~[]\\|;:'\"{},.<>/?\?"
+"\n\t\b\r\f\v\\\'\"\a\?"
+"\\"
+"Beavis & Butthead"
+"Beavis \046 Butthead"
+"Beavis \377 Butthead"
+"Beavis \777 Butthead"
+"Beavis \0800 Butthead"
+"Beavis\tButthead"
+"\102\145avis" "Jonathan 'Cinco Ocho' Papelbon" "Jonathan \"Cinco Ocho\" Papelbon"
+"EOF
