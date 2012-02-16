@@ -1,0 +1,2 @@
+char j;
+int a=;

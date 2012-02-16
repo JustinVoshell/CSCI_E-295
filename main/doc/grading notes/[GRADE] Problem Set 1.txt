@@ -1,0 +1,14 @@
+From: Daniel Willenson <cscie295.ta@gmail.com>
+Subject: [GRADE] Problem Set 1
+Date: February 15, 2012 9:42:52 PM EST
+To: Justin Voshell <justin.voshell@me.com>
+Cc: "James L. Frankel" <frankel@seas.harvard.edu>
+
+Hi Justin,
+Here are your grade and notes for problem set 1.
+
+voshell ( 99 / 100 ; 4 days late )
+  [-1] chooses wrong types for integer constants (should be int, unsigned long)
+
+Let me know if you have any questions,
+Daniel
