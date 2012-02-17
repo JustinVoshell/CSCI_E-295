@@ -1,0 +1,59 @@
+assignment-op : = | += | -= | *= | /= | %= | <<= | >>= | &= | ^= | |=
+
+break-statement : break;
+
+character-escape-code : n | t | b | r | f | v | \ | ' | " | a | ?
+
+character-type-specifier : char | signed char | unsigned char
+
+continue-statement : continue;
+
+digit : [0-9]
+
+equality-op : == | !=
+
+mult-op : * | / | %
+
+nondigit : [A-Za-z_]
+
+nonzero-digit : [1-9]
+
+null-statement : ;
+
+octal-digit : [0-7]
+
+relational-op : < | <= | > | >=
+
+shift-op : << | >>
+
+signed-type-specifier: short | short int | signed short int
+                     | int | signed int | signed 
+                     | long | long int | signed long | signed long int
+
+string-constant : " s-char-sequence_opt "
+
+unsigned-type-specifier : unsigned short | unsigned short int
+                        | unsigned | unsigned int
+                        | unsigned long | unsigned long int
+
+void-type-specifier : void
+
+--
+
+digit-sequence : digit
+               | digit-sequence digit
+
+octal-escape-code : octal-digit
+                  | octal-digit octal-digit
+                  | octal-digit octal-digit octal-digit
+
+escape-code : character-escape-code
+              octal-escape-code
+
+escape-character : \ escape-code
+
+c-char : [:print:]{-}[\\\'\"]
+       | escape-character
+
+c-char-sequence : c-char
+                  c-char-sequence
