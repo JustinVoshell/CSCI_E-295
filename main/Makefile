@@ -1,41 +1,33 @@
-# scanner/Makefile
+# Makefile
 # Justin Voshell - jvoshell@me.com
 # CSCI E295 Spring 2012
 
-.PHONY : all clean test
+jhv-src := $(PWD)/src
+export jhv-src
 
-all : scannerCLI
-scannerCLI : scanner.o scanner_codes.o scannerCLI.o
-scanner_codes.o : scanner.h scanner_codes.h
-scanner.o : scanner.h scanner_codes.h
+jhv-include := $(PWD)/include
+export jhv-include
 
-%.c : %.lex
-	$(LEX) $(LEXFLAGS) -o $@ $<
+jhv-test := $(PWD)/test
+export jhv-test
 
-CC = gcc
-CFLAGS += -g -Wall -Wextra -pedantic
-LINK.o = $(CC) $(LDFLAGS) $(TARGET_ARCH)
-LDLIBS += -lfl -ll -lpthread
-LEX = flex
-LEXFLAGS +=
+jhv-bin := $(PWD)/bin
+export jhv-bin
+
+jhv-test-bin := $(PWD)/bin/test
+export jhv-test-bin
+
+jhv-redist-gtest := $(PWD)/redist/gtest-1.6.0
+export jhv-redist-gtest
+
+all : 
+	@cd $(jhv-bin); make all
 
 clean :
-	rm -f *.o scannerCLI
-	rm -f *~ *#
+	cd $(jhv-bin); make clean
+	cd $(jhv-test-bin); make clean
 
-test :
-	cat test/test_all_keywords.txt
-	./scannerCLI test/test_all_keywords.txt
-	cat test/test_all_operators.txt
-	./scannerCLI test/test_all_operators.txt
-	cat test/test_characters.txt
-	./scannerCLI test/test_characters.txt
-	cat test/test_comments.txt
-	./scannerCLI test/test_comments.txt
-	cat test/test_identifiers.txt
-	./scannerCLI test/test_identifiers.txt
-	cat test/test_numbers.txt
-	./scannerCLI test/test_numbers.txt
-	cat test/test_strings.txt
-	./scannerCLI test/test_strings.txt
+test : all
+	@cd $(jhv-test-bin); make all; make test
 
+.PHONY : all clean test

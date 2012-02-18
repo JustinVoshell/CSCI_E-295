@@ -10,15 +10,15 @@ scanner.o : scanner.h scanner_codes.h
 clean :
 	rm *.o scannerCLI
 
-vpath %.c $(csci-e295-src)
-vpath %.h $(csci-e295-include)
-vpath %.l $(csci-e295-src)
-vpath %.y $(csci-e295-src)
+vpath %.c $(jhv-src)
+vpath %.h $(jhv-include)
+vpath %.l $(jhv-src)
+vpath %.y $(jhv-src)
 
 # COMPILE.c
 CC = gcc
 CFLAGS += -g -Wall -Wextra -pedantic
-CPPFLAGS += -I $(csci-e295-include)
+CPPFLAGS += -I $(jhv-include)
 
 # LINK.o
 LDLIBS += -lfl -ll -pthread 
