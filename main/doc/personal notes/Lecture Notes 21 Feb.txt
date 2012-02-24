@@ -1,0 +1,99 @@
+We'll need to create symbol tables for each scope where a symbol table is required:
+- Each block scope
+- Each function scope
+- Global scope
+- etc.
+
+'unsigned int' will be a base type
+'pointer to unsigned int' will be a composite type, etc.
+
+'Permabit'
+
+int A[5];
+
+Everywhere you say 'A' in a C program, it's converted to &A[0], except:
+	- sizeof A
+	- &A  (in this case, &A equiv A)
+
+So-- this is kind of complex in multi-D arrays:
+
+int A[2][3];
+
+The type of A is ARRAY[2] of ARRAY[3] of INT
+
+If I want to say p = A[0], p must be declared as int* p;
+If I want to say pp = A, pp must be declared as (int[3])* pp;
+
+structs may have holes in their allocation, but order is guaranteed.
+fields of a struct are not necessarily contiguous, but are guaranteed to be ordered.
+'holes' show up to allow for enforcement of byte-alignment
+
+odd 'bit-field' mapping of a struct across a section of memory.
+no guarantee these will be contiguous from compiler to compiler, but
+most compilers try to place these contiguously.
+
+struct DiskReg {
+	unsigned int ready:1;
+	unsigned int errorOccured:1;
+	unsigned int diskSpinning:1;
+	unsigned int writeProtect:1;
+	unsigned int headLoaded:1;
+	unsigned int errorCode:1;	
+	unsigned int track:9;
+	unsigned int sector:5;
+	unsigned int command:5;	
+}
+
+size of union is size needed for largest field.
+
+Representation of signed integers:
+
+'Sign & Magnitude'
+  K bytes:
+   	MSB = sign bit
+   	(-1)^MSB * {0 -> 2^(K-1)-1)}
+
+  Issue: two zeroes.  bad.
+  Another issue: relative values are not contiguous... arithmetic must be handled specially
+
+"One's Complement"
+  ~x = -x
+    Still two zeroes, but relative values are typically adjacent.  Silly stuff around 0 still
+
+"Two's Complement"
+  -x = ~x + 1
+	One zero.
+	Commutative
+	Relative values are adjacent
+	MSB of 1 means negative
+	Oddly, we have one more negative number than positive number.  The negative of that number returns that number.
+	Used by most modern computers.
+
+"Excess notation"
+	value = representation - bias
+	ex: for a 4 -bit value, given a bias of 4, we can represent values from (-3 to +11)
+	
+Floating-point number representation
+ 1  8/11       23/52
++-+-------+---------------+
+|s|   e   |      f        |
++-+-------+---------------+
+exponent has bias: 127 / 1023
+
+s: + or -
+e: exponent value
+f: significand or mantissa or fraction
+
+e shifts the 'binary decimal point'
+
+x = (-1)^s * 2^e * SUM[k{1,p}(f[k]*b^-k)]
+
+we use a canonical representation so that we don't end up with duplicates.
+the canonical representation requires the first digit of f (f[1]) be 1.
+
+in float: {2^-127 -> 2^128}
+
+order of operations matters for floating point numbers!!
+precision loss is easy as well.
+
+zero: e & f are all 0.  s:1 or 0.

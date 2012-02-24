@@ -1,0 +1,39 @@
+From: Daniel Willenson <cscie295.ta@gmail.com>
+Subject: Re: c-char-sequence
+Date: February 17, 2012 10:42:04 AM EST
+To: "justin.voshell" <justin.voshell@me.com>
+
+Hi Justin,
+
+You're right, we won't allow the specification of multi-byte character constants, so you should ignore the line specifying c-char-sequence.
+
+Daniel
+
+On Thu, Feb 16, 2012 at 8:41 PM, justin.voshell <justin.voshell@me.com> wrote:
+Hello,
+
+I noticed in the provided grammar on the course website that the following production is not #'ed out:
+
+c-char-sequence : c-char | c-char-sequence c-char
+
+We're then told to 'see associated grammar' for character-constant.  When I look up character-constant in H&S I see:
+
+character-constant : 'c-char-sequence' | L'c-char-sequence'
+
+I wanted to be sure we aren't extending the language specified in Problem Set 1.  I believe the way we defined things before, the grammar should look like this:
+
+character-constant : ' c-char '
+c-char : [[:print:]]{-}[\\\'\n] | escape-character
+escape-character : \ escape-code
+escape-code : character-escape-code | octal-escape-code
+character-escape-code : n | t | b | r | f | v | \ | ' | " | a | ?
+octal-escape-code : [0-7]{1,3}
+
+and the c-char-sequence production is unnecessary and should be #'ed out.
+
+Is this correct?
+- Justin
+ 
+
+
+

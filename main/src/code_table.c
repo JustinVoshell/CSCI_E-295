@@ -1,20 +1,26 @@
 #include <string.h>
-#include "scanner_codes.h"
 
-/* scanner_codes.c
+#include "code_table.h"
+#include "tokens.h"
+#include "token_attributes.h"
+
+/* code_table.c
    Justin Voshell - justin.voshell@me.com
    CSCI-E295 Spring 2012
 
    Provides a facility for mapping codes returned by the scanner into
-   string names that are more appropriate for display to a user.  The approach 
-   here mimics the one taken in Willenson's scanner_tokens.c: an array is used
-   to map a constant's value to a stringification of the constant.
+   string names that are more appropriate for display to a user.  
+
+   The approach here mimics the one taken in Willenson's scanner_tokens.c: an 
+   array is used to map a constant's value to a stringification of the 
+   constant.
 
    I've added a macro to allow for a string message to be used instead of the
    stringification.  This is used for error messages.
 */
 
-/* Store stringification of constant name at constant's value in 
+/* 
+   Store stringification of constant name at constant's value in 
    _encoding array
 */
 #define ENCODE(CODE) encoding_[CODE] = #CODE
@@ -23,7 +29,7 @@
 #define ENCODE_MESSAGE(CODE, MESSAGE) encoding_[CODE] = MESSAGE
 
 /* Mapping of code values to string descriptions */
-char* encoding_[LAST_CODE + 1] = { NULL };
+char* encoding_[CODE_TABLE_SIZE] = { NULL };
 
 /* decode
   
@@ -62,7 +68,13 @@ void init_code_table()
 {  
   ENCODE(IDENTIFIER);
   ENCODE(LITERAL_STRING);
-  ENCODE(LITERAL_INTEGER);
+  ENCODE(LITERAL_NUMBER);
+	ENCODE(LITERAL_CHAR);
+	ENCODE(LITERAL_SHORT);
+	ENCODE(LITERAL_INT);
+	ENCODE(LITERAL_ULONG);
+	ENCODE(NO_OVERFLOW);
+	ENCODE(HAS_OVERFLOW);
   ENCODE(BREAK);
   ENCODE(CHAR);
   ENCODE(CONTINUE);

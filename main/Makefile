@@ -22,12 +22,13 @@ export jhv-redist-gtest
 
 all : 
 	@cd $(jhv-bin); make all
+	@cd $(jhv-test-bin); make all
 
 clean :
 	cd $(jhv-bin); make clean
 	cd $(jhv-test-bin); make clean
 
 test : all
-	@cd $(jhv-test-bin); make all; make test
+	@cd $(jhv-test-bin); make test
 
 .PHONY : all clean test

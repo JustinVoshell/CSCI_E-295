@@ -1,12 +1,14 @@
 %{
   /* 
-   scanner.lex
+   scanner.l
    Justin Voshell - justin.voshell@me.com
    CSCI E-295 Spring 2012
 
-   Scanner definition to be consumed by flex.  Example code provided by 
-   Daniel Willenson and Dr. James Frankel was consulted in the development
-   of this file as well as the flex manual.
+   Scanner definition to be consumed by flex in standalone scanning
+   mode or in conjunction with bison.  
+
+   Example code provided by Daniel Willenson and Dr. James Frankel was
+   consulted in the development of this file as well as the flex manual.
 
    Source language is specified in Problem Set 1 and Harbison & Steele.  
 
@@ -19,8 +21,8 @@
   #include <errno.h>
   #include <limits.h>
 
-  #include "scanner.h"
-  #include "scanner_codes.h"
+  #include "tokens.h"
+  #include "token_attributes.h"
 
   /* We use yyval to pass token attriute values to the client */  
   #define YYSTYPE void*
@@ -34,7 +36,7 @@
      than 64KB are not allowed.  In the future I may add a facility for growing
      the string buffer to store longer literals.
   */
-  #define MAX_STR_LEN E295_SHORT_MAX
+  #define MAX_STR_LEN LITERAL_SHORT_MAX
   char* string_buffer;
   char* string_buffer_cursor;
   int initialize_string_buffer();
@@ -51,10 +53,10 @@
     responsibility of the client.
   */ 
   char* make_id(const char* text, const int length);
-  integer_t* make_integer(const char* text);
-  integer_t* make_integer_from_char(const int charValue);
-  integer_t* make_integer_from_octal(const char* text);
-  string_t* make_string();
+  integer* make_integer(const char* text);
+  integer* make_integer_from_char(const int charValue);
+  integer* make_integer_from_octal(const char* text);
+  string* make_string();
 
 %}
 
@@ -132,7 +134,7 @@ num                 0|[1-9][[:digit:]]*
    long   4
  */
 {num}             { yylval = (YYSTYPE) make_integer(yytext);
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 
  /*
    Character literals
@@ -146,32 +148,32 @@ num                 0|[1-9][[:digit:]]*
    character constants have type 'int'.
  */
 "'"[[:print:]]{-}[\\\n\']"'" { yylval = (YYSTYPE) make_integer_from_char(yytext[1]);
-                               return LITERAL_INTEGER; }
+                               return LITERAL_NUMBER; }
 
 "''"                return E_BAD_LITERAL_CHAR;
 
 "'\\''"           { yylval = (YYSTYPE) make_integer_from_char('\'');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\n'"           { yylval = (YYSTYPE) make_integer_from_char('\n');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\t'"           { yylval = (YYSTYPE) make_integer_from_char('\t');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\b'"           { yylval = (YYSTYPE) make_integer_from_char('\b');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\r'"           { yylval = (YYSTYPE) make_integer_from_char('\r');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\f'"           { yylval = (YYSTYPE) make_integer_from_char('\f');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\v'"           { yylval = (YYSTYPE) make_integer_from_char('\v');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\\\'"          { yylval = (YYSTYPE) make_integer_from_char('\\');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\\"'"          { yylval = (YYSTYPE) make_integer_from_char('\"'); 
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\a'"           { yylval = (YYSTYPE) make_integer_from_char('\a');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 "'\\?'"           { yylval = (YYSTYPE) make_integer_from_char('\?');
-                    return LITERAL_INTEGER; }
+                    return LITERAL_NUMBER; }
 
  /*
    Per Harbison & Steele section 2.7.3, character constants have type 'int', but
@@ -185,7 +187,7 @@ num                 0|[1-9][[:digit:]]*
    occurs.
  */
 "'\\"[0-7]{1,3}"'" { yylval = (YYSTYPE) make_integer_from_octal(yytext); 
-                     return LITERAL_INTEGER; } 
+                     return LITERAL_NUMBER; } 
 "'\\"[0-9]+"'"       return E_BAD_OCTAL_LITERAL;
 
  /* 
@@ -211,8 +213,8 @@ num                 0|[1-9][[:digit:]]*
 
    Character escape codes are permitted for n, t, b, r, f, v, ', ", \, a, and ?.
    Octal escape codes are permitted for one, two, or three digit octal literals.
-   Octal values over E295_CHAR_MAX are treated as overflow and recorded at
-   E295_CHAR_MAX.
+   Octal values over LITERAL_CHAR_MAX are treated as overflow and recorded at
+   LITERAL_CHAR_MAX.
 
    A single backslash may be used to continue a string from one line to the next
    When used in this fashion, the backslash must be the last character before 
@@ -364,33 +366,33 @@ char* make_id(const char* string, const int length)
 
 /* make_integer
 
-   Parses an integer value from provided string.  Creates an integer_t instance
+   Parses an integer value from provided string.  Creates an integer instance
    carrying the parsed value, the suggested type for the value, and a flag that
    indicates if overflow occurred.
 
    Parameters   : string (char*)
 
-   Returns      : integer_t* location of integer_t structure containing parsed
+   Returns      : integer* location of integer structure containing parsed
                   integer value, suggested type, and overflow indicator.
-                  NULL if new integer_t cannot be allocated.
+                  NULL if new integer cannot be allocated.
 
    Side-effects : Attempts to allocate memory on the heap.
                   Copies data into allocated memory.
 */
-integer_t* make_integer(const char* string)
+integer* make_integer(const char* string)
 {
-  integer_t* integer;
+  integer* newInteger;
 
-  integer = (integer_t*) malloc(sizeof(integer_t));
+  newInteger = (integer*) malloc(sizeof(integer));
  
-  if (!integer)
+  if (!newInteger)
   {
-    return integer;
+    return newInteger;
   }
   
   errno = 0;
-  integer->overflow = 0;
-  integer->value = strtoul(string, NULL, 10);
+  newInteger->overflow_flag = NO_OVERFLOW;
+  newInteger->value = strtoul(string, NULL, 10);
 
   /* We consider the overflow case first.  If the returned value is larger
      that our maximum integer, we set the value to our maximum integer and
@@ -398,84 +400,88 @@ integer_t* make_integer(const char* string)
      (as defined in <limits.h>) and sets errno to ERANGE.
   */
    
-  if ((ERANGE == errno && ULONG_MAX == integer->value)||(integer->value > E295_INT_MAX))
+  if ((ERANGE == errno && ULONG_MAX == newInteger->value) || (newInteger->value > LITERAL_ULONG_MAX))
   {
-    integer->value = E295_INT_MAX;
-    integer->type = INT;
-    integer->overflow = 1;
+    newInteger->value = LITERAL_ULONG_MAX;
+    newInteger->type = LITERAL_ULONG;
+    newInteger->overflow_flag = HAS_OVERFLOW;
   }
 
   /* If we aren't overflowing, we apply the logic from Harbison & Steele table
      2-5 to the table in our language spec.
   */ 
-  else if (integer->value <= E295_CHAR_MAX)
+  else if (newInteger->value <= LITERAL_CHAR_MAX)
   {
-    integer->type = CHAR;
+    newInteger->type = LITERAL_CHAR;
   }
-  else if (integer->value <= E295_SHORT_MAX)
+  else if (newInteger->value <= LITERAL_SHORT_MAX)
   {
-    integer->type = SHORT;
+    newInteger->type = LITERAL_SHORT;
+  }
+  else if (newInteger->value <= LITERAL_INT_MAX)
+  {
+    newInteger->type = LITERAL_INT;
   }
   else
   {
-    integer->type = INT;
+	newInteger->type = LITERAL_ULONG;
   }
 
-  return integer;
+  return newInteger;
 }
 
 /* make_integer_from_char
 
-   Creates an integer_t from a character literal.  If character literal value
+   Creates an integer from a character literal.  If character literal value
    comes from an octal literal, use make_integer_from_octal instead.
 
    Parameters   : charValue (int)
                   - numeric representation of a single literal character.
 
-   Returns      : integer_t* location of integer_t_structure containing provided
-                  value, suggested type (INT), and indication of no overflow.
+   Returns      : integer* location of integer_structure containing provided
+                  value, suggested type (LITERAL_INT), and indication of no overflow.
 
    Side-effects : Attempts to allocate memory on the heap.
                   Copies data into allocated memory.
 */
-integer_t* make_integer_from_char(const int charValue)
+integer* make_integer_from_char(const int charValue)
 {
-  integer_t* integer;
-  integer = (integer_t*) malloc(sizeof(integer_t));
+  integer* newInteger;
+  newInteger = (integer*) malloc(sizeof(integer));
 
-  if (!integer)
+  if (!newInteger)
   {
-    return integer;
+    return newInteger;
   }
 
-  integer->value = charValue;
-  integer->type = INT;
-  integer->overflow = 0;
+  newInteger->value = charValue;
+  newInteger->type = LITERAL_INT;
+  newInteger->overflow_flag = NO_OVERFLOW;
 
-  return integer;
+  return newInteger;
 }
 
 /* make_integer_from_octal
 
-   Creates an integer_t from an octal literal.  While three digit octal literals
-   are accepted, values larger than E295_CHAR_MAX are not permitted and are
+   Creates an integer from an octal literal.  While three digit octal literals
+   are accepted, values larger than LITERAL_CHAR_MAX are not permitted and are
    flagged as overflow.
 
    Parameters   : string (char*)
                 - string containing octal literal.  Either '\ or \ is expected
                   in the string before the 1-3 digit octal literal.
   
-   Returns      : integer_t* location of integer_t structure containing parsed
-                  value, suggested type (INT), and indication of overflow.  In
+   Returns      : integer* location of integer structure containing parsed
+                  value, suggested type (LITERAL_INT), and indication of overflow.  In
                   the case of overflow the parsed value is reported as 
-                  E295_CHAR_MAX.
+                  LITERAL_CHAR_MAX.
 
    Side-effects : Attempts to allocate memory on the heap.
                   Copies data into allocated memory.
 */ 
-integer_t* make_integer_from_octal(const char* text)
+integer* make_integer_from_octal(const char* text)
 {
-  integer_t* integer;
+  integer* newInteger;
   unsigned long octalValue;
 
   /* 
@@ -486,18 +492,18 @@ integer_t* make_integer_from_octal(const char* text)
   */
   int offset = (text[0] == '\'') ? 2 : 1;
 
-  integer = (integer_t*) malloc(sizeof(integer_t));
+  newInteger = (integer*) malloc(sizeof(integer));
 
-  if (!integer)
+  if (!newInteger)
   {
-    return integer;
+    return newInteger;
   }
   
   sscanf(text + offset, "%lo", &octalValue);
-  integer->value = octalValue <= E295_CHAR_MAX ? octalValue : E295_CHAR_MAX;
-  integer->overflow = octalValue <= E295_CHAR_MAX ? 0 : 1;
-  integer->type = INT;
-  return integer;
+  newInteger->value = octalValue <= LITERAL_CHAR_MAX ? octalValue : LITERAL_CHAR_MAX;
+  newInteger->overflow_flag = octalValue <= LITERAL_CHAR_MAX ? NO_OVERFLOW : HAS_OVERFLOW;
+  newInteger->type = LITERAL_INT;
+  return newInteger;
 }
 
 /* initialize_string_buffer
@@ -587,7 +593,7 @@ int add_char_to_string_buffer(const char charValue)
 */
 int add_octal_to_string_buffer(const char* octalLiteral)
 {
-  integer_t* integer;
+  integer* integer;
 
   if (remaining_buffer_capacity() > 1)
   {
@@ -632,31 +638,31 @@ int add_string_to_string_buffer(const char* string, const int length)
 
 /* make_string
 
-   Creates a new string_t and populates it with information about 
+   Creates a new string and populates it with information about 
    the string_buffer.  
 
    Parameters   : none
-   Returns      : New string_t containing pointer to string_buffer
+   Returns      : New string containing pointer to string_buffer
                   as well as length and size data about string_buffer.
-                  NULL if a new string_t cannot be allocated.
+                  NULL if a new string cannot be allocated.
 
    Side-effects : Allocates memory on the heap.
                   Increments string_buffer_cursor.
                   Modifies string_buffer to add a terminating '\0'
 */
-string_t* make_string()
+string* make_string()
 {
-  string_t* string = malloc(sizeof(string_t));
-  if (!string)
+  string* newString = malloc(sizeof(string));
+  if (!newString)
   {
-    return string;
+    return newString;
   }
-  string->length = string_buffer_cursor - string_buffer;
-  string->size = MAX_STR_LEN + 1;
+  newString->length = string_buffer_cursor - string_buffer;
+  newString->size = MAX_STR_LEN + 1;
  
   /* Zero-terminate string */
   *++string_buffer_cursor = '\0';
-  string->buffer = string_buffer;
+  newString->buffer = string_buffer;
 
-  return string;
+  return newString;
 }

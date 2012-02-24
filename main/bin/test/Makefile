@@ -8,7 +8,7 @@ vpath %.cpp $(jhv-test)
 vpath %.cc $(jhv-redist-gtest)/src
 all : scanner_unittest
 
-test :
+test : all
 	@./scanner_unittest
 
 clean :
@@ -17,7 +17,7 @@ clean :
 .PHONY : all clean test
 
 scanner_unittest : scanner.o gtest.a
-scanner_unittest.o : scanner.h scanner_codes.h $(GTEST_HEADERS)
+scanner_unittest.o : tokens.h token_attributes.h $(GTEST_HEADERS)
 
 # Make GTEST
 # (taken from section example Makefile)

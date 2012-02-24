@@ -77,5 +77,5 @@ TEST_F(ScannerTest, IntTest) {
   
   EXPECT_EQ(NUMBER, yylex());
   EXPECT_EQ(3902834ul, ((struct number *)yylval)->value);
-  EXPECT_FALSE(((struct number *)yylval)->overflow);
+  EXPECT_FALSE(((struct number *)yylval)->overflow_flag);
 }

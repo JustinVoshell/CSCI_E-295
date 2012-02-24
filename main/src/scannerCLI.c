@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "scanner.h"
-#include "scanner_codes.h"
+#include "tokens.h"
+#include "token_attributes.h"
 
 /*
   Strings longer than MAX_INLINE_STRLEN are output on their own line
@@ -47,8 +47,8 @@ const char* open_io(FILE** inputStream, const char* inputName, FILE** outputStre
 void close_io(FILE* inputStream, FILE* outputStream);
 int handle_token(const int token, void* attribute, FILE* output);
 void fprint_id(FILE* output, const char* id);
-void fprint_integer_t(FILE* output, const integer_t* integer);
-void fprint_string_t(FILE* output, const string_t* string);
+void fprint_integer(FILE* output, const integer* integerData);
+void fprint_string(FILE* output, const string* stringData);
 void fprint_error(FILE* output, const int errorCode);
 void fprint_lexeme(FILE* output, const char* inputName, const char* lexeme, const int lexemeLength, const int lineNumber);
 
@@ -187,7 +187,7 @@ int handle_token(const int token, void* attribute, FILE* output)
     return 0;
   }
 
-  if (IS(WITH_ATTRIBUTE, token)) 
+  if (IS(HAS_ATTRIBUTE, token)) 
   {
     /* 
        If a token is supposed to have an attribute and doesn't, a malloc failed in 
@@ -203,8 +203,8 @@ int handle_token(const int token, void* attribute, FILE* output)
        Call the appropriate function to format and output the attribute value
     */
     if (IDENTIFIER == token)            fprint_id(output, (char*)attribute); 
-    else if (LITERAL_INTEGER == token)  fprint_integer_t(output, (integer_t*)attribute);
-    else if (LITERAL_STRING == token)   fprint_string_t(output, (string_t*)attribute);
+    else if (LITERAL_NUMBER == token)   fprint_integer(output, (integer*)attribute);
+    else if (LITERAL_STRING == token)   fprint_string(output, (string*)attribute);
 
     /*
        Attribute values are allocated in the scanner, so we free them now that we've 
@@ -237,32 +237,33 @@ int handle_token(const int token, void* attribute, FILE* output)
 */
 void fprint_id(FILE* output, const char* id)
 {
-  fprintf(output, "IDENTIFIER: %s\n", id);
+  fprintf(output, "%s: %s\n", decode(IDENTIFIER), id);
 }
 
-/* fprint_integer_t
+/* fprint_integer
 
-   Serializes an integer_t structure to output.
+   Serializes an integer structure to output.
 
    Parameters   : output (FILE*)
                   - output file to write to
 
-                  integer (const integer_t*)
-                  - attribute value for LITERAL_INTEGER token
+                  integer (const integer*)
+                  - attribute value for LITERAL_NUMBER token
 
    Returns      : void
    Side-effects : Writes data to output.
 */
-void fprint_integer_t(FILE* output, const integer_t* integer)
+void fprint_integer(FILE* output, const integer* integer)
 {
-  fprintf(output, "INTEGER: %-12lu\t", integer->value);
+	fprintf(output, "%s\t", decode(LITERAL_NUMBER));
+  fprintf(output, "VALUE: %-12lu\t", integer->value);
   fprintf(output, "TYPE: %-6s\t", decode(integer->type));
-  fputs(0 == integer->overflow ? "NO OVERFLOW\n" : "OVERFLOW\n", output);
+  fputs(decode(integer->overflow_flag), output);
 }
 
-/* fprint_string_t
+/* fprint_string
 
-   Serializes a string_t structure to output.  Attempts to print the string
+   Serializes a string structure to output.  Attempts to print the string
    value inline with the other output if it is less than MAX_INLINE_STRLEN in
    length. Longer strings are wrapped in STRING==> / <==STRING before being
    output.
@@ -270,13 +271,13 @@ void fprint_integer_t(FILE* output, const integer_t* integer)
    Parameters   : output (FILE*)
                   - output file to write to
 
-                  string (string_t*)
+                  string (string*)
                   - attribute value for LITERAL_STRING token
 
    Returns      : void
    Side-effects : Writes data to output.
 */
-void fprint_string_t(FILE* output, const string_t* string) 
+void fprint_string(FILE* output, const string* stringData) 
 {
   /* Used as loop index */
   size_t idx;
@@ -288,21 +289,21 @@ void fprint_string_t(FILE* output, const string_t* string)
      We output the string inline if we can, otherwise we mark its beginning
      and end and then dump the whole string.
   */
-  if (string->length <= MAX_INLINE_STRLEN)
+  if (stringData->length <= MAX_INLINE_STRLEN)
   {
     fputs("STRING: ", output);
-    for (idx = 0; idx < string->length; idx++)
+    for (idx = 0; idx < stringData->length; idx++)
     {
-      fputc(string->buffer[idx], output);
+      fputc(stringData->buffer[idx], output);
     }
     fputs("\n", output);
   }
   else
   {
     fputs("\nSTRING==>", output);
-    for (idx = 0; idx < string->length; idx++)
+    for (idx = 0; idx < stringData->length; idx++)
     {
-      fputc(string->buffer[idx], output);
+      fputc(stringData->buffer[idx], output);
     }
     fputs("<==STRING\n", output);
   }

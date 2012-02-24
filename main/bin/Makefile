@@ -3,9 +3,9 @@
 # CSCI E-295 Spring 2012
 
 all : scannerCLI
-scannerCLI : scanner.o scanner_codes.o
-scanner_codes.o : scanner.h scanner_codes.h
-scanner.o : scanner.h scanner_codes.h
+scannerCLI : scanner.o code_table.o
+code_table.o : code_table.h
+scanner.o : code_table.h tokens.h token_attributes.h
 
 clean :
 	rm *.o scannerCLI

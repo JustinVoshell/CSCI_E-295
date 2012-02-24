@@ -48,7 +48,7 @@ node *create_number_node(unsigned long value, int overflow) {
   assert(NULL != n->data.number);
 
   n->data.number->value = value;
-  n->data.number->overflow = overflow;
+  n->data.number->overflow_flag= overflow;
 
   return n;
 }

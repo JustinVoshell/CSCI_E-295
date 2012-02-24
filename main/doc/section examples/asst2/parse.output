@@ -1,0 +1,387 @@
+Grammar
+
+    0 $accept: root $end
+
+    1 additive_expr: unary_expr
+    2              | additive_expr PLUS unary_expr
+    3              | additive_expr MINUS unary_expr
+
+    4 assignment_expr: additive_expr
+    5                | identifier EQUALS assignment_expr
+
+    6 expr: assignment_expr
+
+    7 identifier: IDENTIFIER
+
+    8 primary_expr: identifier
+    9             | NUMBER
+   10             | LEFT_PAREN expr RIGHT_PAREN
+
+   11 statement: expr SEMICOLON
+   12          | SEMICOLON
+   13          | error SEMICOLON
+
+   14 statement_list: statement
+   15               | statement_list statement
+
+   16 root: statement_list
+
+   17 unary_expr: primary_expr
+   18           | MINUS unary_expr
+   19           | PLUS unary_expr
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256) 13
+IDENTIFIER (258) 7
+NUMBER (259) 9
+MINUS (260) 3 18
+PLUS (261) 2 19
+EQUALS (262) 5
+LEFT_PAREN (263) 10
+RIGHT_PAREN (264) 10
+SEMICOLON (265) 11 12 13
+
+
+Nonterminals, with rules where they appear
+
+$accept (11)
+    on left: 0
+additive_expr (12)
+    on left: 1 2 3, on right: 2 3 4
+assignment_expr (13)
+    on left: 4 5, on right: 5 6
+expr (14)
+    on left: 6, on right: 10 11
+identifier (15)
+    on left: 7, on right: 5 8
+primary_expr (16)
+    on left: 8 9 10, on right: 17
+statement (17)
+    on left: 11 12 13, on right: 14 15
+statement_list (18)
+    on left: 14 15, on right: 15 16
+root (19)
+    on left: 16, on right: 0
+unary_expr (20)
+    on left: 17 18 19, on right: 1 2 3 18 19
+
+
+state 0
+
+    0 $accept: . root $end
+
+    error       shift, and go to state 1
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+    SEMICOLON   shift, and go to state 7
+
+    additive_expr    go to state 8
+    assignment_expr  go to state 9
+    expr             go to state 10
+    identifier       go to state 11
+    primary_expr     go to state 12
+    statement        go to state 13
+    statement_list   go to state 14
+    root             go to state 15
+    unary_expr       go to state 16
+
+
+state 1
+
+   13 statement: error . SEMICOLON
+
+    SEMICOLON  shift, and go to state 17
+
+
+state 2
+
+    7 identifier: IDENTIFIER .
+
+    $default  reduce using rule 7 (identifier)
+
+
+state 3
+
+    9 primary_expr: NUMBER .
+
+    $default  reduce using rule 9 (primary_expr)
+
+
+state 4
+
+   18 unary_expr: MINUS . unary_expr
+
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+
+    identifier    go to state 18
+    primary_expr  go to state 12
+    unary_expr    go to state 19
+
+
+state 5
+
+   19 unary_expr: PLUS . unary_expr
+
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+
+    identifier    go to state 18
+    primary_expr  go to state 12
+    unary_expr    go to state 20
+
+
+state 6
+
+   10 primary_expr: LEFT_PAREN . expr RIGHT_PAREN
+
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+
+    additive_expr    go to state 8
+    assignment_expr  go to state 9
+    expr             go to state 21
+    identifier       go to state 11
+    primary_expr     go to state 12
+    unary_expr       go to state 16
+
+
+state 7
+
+   12 statement: SEMICOLON .
+
+    $default  reduce using rule 12 (statement)
+
+
+state 8
+
+    2 additive_expr: additive_expr . PLUS unary_expr
+    3              | additive_expr . MINUS unary_expr
+    4 assignment_expr: additive_expr .
+
+    MINUS  shift, and go to state 22
+    PLUS   shift, and go to state 23
+
+    $default  reduce using rule 4 (assignment_expr)
+
+
+state 9
+
+    6 expr: assignment_expr .
+
+    $default  reduce using rule 6 (expr)
+
+
+state 10
+
+   11 statement: expr . SEMICOLON
+
+    SEMICOLON  shift, and go to state 24
+
+
+state 11
+
+    5 assignment_expr: identifier . EQUALS assignment_expr
+    8 primary_expr: identifier .
+
+    EQUALS  shift, and go to state 25
+
+    $default  reduce using rule 8 (primary_expr)
+
+
+state 12
+
+   17 unary_expr: primary_expr .
+
+    $default  reduce using rule 17 (unary_expr)
+
+
+state 13
+
+   14 statement_list: statement .
+
+    $default  reduce using rule 14 (statement_list)
+
+
+state 14
+
+   15 statement_list: statement_list . statement
+   16 root: statement_list .
+
+    error       shift, and go to state 1
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+    SEMICOLON   shift, and go to state 7
+
+    $end  reduce using rule 16 (root)
+
+    additive_expr    go to state 8
+    assignment_expr  go to state 9
+    expr             go to state 10
+    identifier       go to state 11
+    primary_expr     go to state 12
+    statement        go to state 26
+    unary_expr       go to state 16
+
+
+state 15
+
+    0 $accept: root . $end
+
+    $end  shift, and go to state 27
+
+
+state 16
+
+    1 additive_expr: unary_expr .
+
+    $default  reduce using rule 1 (additive_expr)
+
+
+state 17
+
+   13 statement: error SEMICOLON .
+
+    $default  reduce using rule 13 (statement)
+
+
+state 18
+
+    8 primary_expr: identifier .
+
+    $default  reduce using rule 8 (primary_expr)
+
+
+state 19
+
+   18 unary_expr: MINUS unary_expr .
+
+    $default  reduce using rule 18 (unary_expr)
+
+
+state 20
+
+   19 unary_expr: PLUS unary_expr .
+
+    $default  reduce using rule 19 (unary_expr)
+
+
+state 21
+
+   10 primary_expr: LEFT_PAREN expr . RIGHT_PAREN
+
+    RIGHT_PAREN  shift, and go to state 28
+
+
+state 22
+
+    3 additive_expr: additive_expr MINUS . unary_expr
+
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+
+    identifier    go to state 18
+    primary_expr  go to state 12
+    unary_expr    go to state 29
+
+
+state 23
+
+    2 additive_expr: additive_expr PLUS . unary_expr
+
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+
+    identifier    go to state 18
+    primary_expr  go to state 12
+    unary_expr    go to state 30
+
+
+state 24
+
+   11 statement: expr SEMICOLON .
+
+    $default  reduce using rule 11 (statement)
+
+
+state 25
+
+    5 assignment_expr: identifier EQUALS . assignment_expr
+
+    IDENTIFIER  shift, and go to state 2
+    NUMBER      shift, and go to state 3
+    MINUS       shift, and go to state 4
+    PLUS        shift, and go to state 5
+    LEFT_PAREN  shift, and go to state 6
+
+    additive_expr    go to state 8
+    assignment_expr  go to state 31
+    identifier       go to state 11
+    primary_expr     go to state 12
+    unary_expr       go to state 16
+
+
+state 26
+
+   15 statement_list: statement_list statement .
+
+    $default  reduce using rule 15 (statement_list)
+
+
+state 27
+
+    0 $accept: root $end .
+
+    $default  accept
+
+
+state 28
+
+   10 primary_expr: LEFT_PAREN expr RIGHT_PAREN .
+
+    $default  reduce using rule 10 (primary_expr)
+
+
+state 29
+
+    3 additive_expr: additive_expr MINUS unary_expr .
+
+    $default  reduce using rule 3 (additive_expr)
+
+
+state 30
+
+    2 additive_expr: additive_expr PLUS unary_expr .
+
+    $default  reduce using rule 2 (additive_expr)
+
+
+state 31
+
+    5 assignment_expr: identifier EQUALS assignment_expr .
+
+    $default  reduce using rule 5 (assignment_expr)
