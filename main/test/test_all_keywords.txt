@@ -1,7 +1,0 @@
-break char continue do else for goto
-if int long   return  short signed
-unsigned      void    while
-
-	      	      
-
-			

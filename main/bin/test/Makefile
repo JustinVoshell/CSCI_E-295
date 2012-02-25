@@ -2,31 +2,40 @@
 # Justin Voshell - justin.voshell@me.com
 # CSCI E-295 Spring 2012
 
-vpath %.h $(jhv-include) $(jhv-redist-gtest)/src
-vpath %.o $(jhv-bin)
-vpath %.cpp $(jhv-test)
-vpath %.cc $(jhv-redist-gtest)/src
-all : scanner_unittest
+all : UnitTests
+	@cp -r $(jhv-test)/data .
 
 test : all
-	@./scanner_unittest
+	@./UnitTests
 
 clean :
-	rm -f *.o scanner_unittest
+	@rm -f *.o UnitTests
+	@rm -rf ./data
+
+SCANNER_OBJ = scanner.o integer_attribute.o string_attribute.o code_table.o
+SCANNER_INC = tokens.h integer_attribute.h string_attribute.h code_table.h 
+UNIT_TESTS = ScannerTestBase.o ScannerIntegerTests.o ScannerKeywordTests.o ScannerOperatorTests.o ScannerCharacterTests.o ScannerStringTests.o ScannerCommentTests.o ScannerIdentifierTests.o ScannerWillenson2009FileTests.o
+
+UnitTests : $(SCANNER_OBJ) $(UNIT_TESTS) gtest.a 
+Scanner%Tests.o : ScannerTestBase.h $(SCANNER_INC) $(TEST_HEADERS)
+ScannerTestBase.o : ScannerTestBase.h $(SCANNER_INC) $(TEST_HEADERS) 
+
+vpath %.h $(jhv-include) $(jhv-test)/include $(jhv-redist-gtest)/src
+vpath %.o $(jhv-bin)
+vpath %.cpp $(jhv-test)/src
+vpath %.cc $(jhv-redist-gtest)/src
 
 .PHONY : all clean test
-
-scanner_unittest : scanner.o gtest.a
-scanner_unittest.o : tokens.h token_attributes.h $(GTEST_HEADERS)
 
 # Make GTEST
 # (taken from section example Makefile)
 
 CPP = g++
 CXXFLAGS += -g -Wall -Wextra \
-	    -I$(jhv-redist-gtest) \
+	          -I$(jhv-redist-gtest) \
             -I$(jhv-redist-gtest)/include \
-            -I$(jhv-include)
+            -I$(jhv-include) \
+            -I$(jhv-test)/include
 
 LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 

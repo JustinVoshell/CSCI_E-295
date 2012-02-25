@@ -1,69 +1,20 @@
 #include <string.h>
 
 #include "code_table.h"
+#include "integer_attribute.h"
 #include "tokens.h"
-#include "token_attributes.h"
 
-/* code_table.c
-   Justin Voshell - justin.voshell@me.com
-   CSCI-E295 Spring 2012
-
-   Provides a facility for mapping codes returned by the scanner into
-   string names that are more appropriate for display to a user.  
-
-   The approach here mimics the one taken in Willenson's scanner_tokens.c: an 
-   array is used to map a constant's value to a stringification of the 
-   constant.
-
-   I've added a macro to allow for a string message to be used instead of the
-   stringification.  This is used for error messages.
-*/
-
-/* 
-   Store stringification of constant name at constant's value in 
-   _encoding array
-*/
 #define ENCODE(CODE) encoding_[CODE] = #CODE
-
-/* Store message at constant's value in _encoding array */
 #define ENCODE_MESSAGE(CODE, MESSAGE) encoding_[CODE] = MESSAGE
 
-/* Mapping of code values to string descriptions */
-char* encoding_[CODE_TABLE_SIZE] = { NULL };
+char* encoding_[CODE_TABLE_SIZE] = { 0 };
 
-/* decode
-  
-   Returns a string value associated with the provided code.
-   NOTE: init_code_table() must be called once before calling this function.
-
-   Parameters   : code (const int)
-                  - code value to fetch string for.  Should be a code
-                    defined in scanner_codes.h
-
-   Returns      : string value saved in table for code.
-                  NULL if no string value found.
-
-   Side-effects : none
-*/
 const char* decode(const int code)
 {
-  if (IS(CODE, code)) {
-    return encoding_[code];
-  }
-  
-  return NULL;
+	if (code < 0 || code > CODE_TABLE_SIZE) { return 0; }
+  return encoding_[code]; 
 }
 
-/* init_code_table
-
-   Must be called once to load strings into code table.
-
-   Parameters   : none
-
-   Returns      : none
-
-   Side-effects : Modifies values in _encoding to point to string constants.
-*/
 void init_code_table()
 {  
   ENCODE(IDENTIFIER);
@@ -145,5 +96,4 @@ void init_code_table()
   ENCODE_MESSAGE(E_UNTERM_STR, "Unterminated string");
   ENCODE_MESSAGE(E_BAD_CHAR_ESCAPE, "Invalid character escape sequence.");
   ENCODE_MESSAGE(E_OUT_OF_MEMORY, "Out of memory!");
-
 }

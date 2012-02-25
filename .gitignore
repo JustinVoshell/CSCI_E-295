@@ -3,5 +3,6 @@
 *.[ao]
 *~
 *\#
-redist/
 .DS_store
+redist/
+main/bin/test/data/
