@@ -1,5 +1,5 @@
 #include "ScannerTestBase.h"
-#include "integer_attribute.h"
+#include "model/integer.h"
 
 class ScannerCommentTests : public ScannerTestBase {};
 

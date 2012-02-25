@@ -1,21 +1,22 @@
 #include <string.h>
 
-#include "code_table.h"
-#include "integer_attribute.h"
-#include "tokens.h"
+#include "model/codes.h"
+#include "model/tokens.h"
+#include "model/errors.h"
+#include "model/integer.h"
 
-#define ENCODE(CODE) encoding_[CODE] = #CODE
-#define ENCODE_MESSAGE(CODE, MESSAGE) encoding_[CODE] = MESSAGE
+#define ENCODE(CODE) codes_[CODE] = #CODE
+#define ENCODE_MESSAGE(CODE, MESSAGE) codes_[CODE] = MESSAGE
 
-char* encoding_[CODE_TABLE_SIZE] = { 0 };
+char* codes_[CODE_TABLE_SIZE] = { 0 };
 
-const char* decode(const int code)
+const char* codes_get(const int code)
 {
 	if (code < 0 || code > CODE_TABLE_SIZE) { return 0; }
-  return encoding_[code]; 
+  return codes_[code]; 
 }
 
-void init_code_table()
+void codes_init()
 {  
   ENCODE(IDENTIFIER);
   ENCODE(LITERAL_STRING);

@@ -1,5 +1,5 @@
-#ifndef TOKENS_H
-#define TOKENS_H
+#ifndef TOKENS_H_JHV9902116
+#define TOKENS_H_JHV9902116
 
 #define IDENTIFIER           	301 
 #define LITERAL_STRING       	302
@@ -64,4 +64,6 @@
 #define STATEMENT_TERMINATOR  361
 #define SEQUENTIAL_EVAL       362
 
-#endif /*TOKENS_H*/
+int token_has_attribute(int token);
+
+#endif /*TOKENS_H_JHV9902116*/

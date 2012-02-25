@@ -1,8 +1,5 @@
-#ifndef CODE_TABLE_H
-#define CODE_TABLE_H
-
-void init_code_table(void);
-const char* decode(const int code);
+#ifndef ERRORS_H_JHV9902116
+#define ERRORS_H_JHV9902116
 
 #define E_NO_MATCHING_TOKEN	  1001    
 #define E_BAD_LITERAL_CHAR    1002 
@@ -16,4 +13,7 @@ const char* decode(const int code);
 #define E_EOF_STR             1010
 #define CODE_TABLE_SIZE       1011
 
-#endif /*CODE_TABLE_H*/
+int error_is_EOF(int errorCode);
+int error_should_exit(int errorCode);
+
+#endif /*ERRORS_H_JHV9902116*/

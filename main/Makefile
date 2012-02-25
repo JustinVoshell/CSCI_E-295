@@ -1,7 +1,3 @@
-# Makefile
-# Justin Voshell - jvoshell@me.com
-# CSCI E295 Spring 2012
-
 jhv-src := $(PWD)/src
 export jhv-src
 
@@ -22,11 +18,9 @@ export jhv-redist-gtest
 
 all : 
 	@cd $(jhv-bin); make all
-	@cd $(jhv-test-bin); make all
 
 clean :
-	cd $(jhv-bin); make clean
-	cd $(jhv-test-bin); make clean
+	@cd $(jhv-bin); make clean
 
 test : all
 	@cd $(jhv-test-bin); make test

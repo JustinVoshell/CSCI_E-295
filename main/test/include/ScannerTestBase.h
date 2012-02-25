@@ -4,8 +4,8 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "integer_attribute.h"
-#include "string_attribute.h"
+#include "model/integer.h"
+#include "model/string_buffer.h"
 }
 
 class ScannerTestBase : public ::testing::Test

@@ -1,8 +1,8 @@
 #include "ScannerTestBase.h"
 #include <stdio.h>
 #include <errno.h>
-#include "tokens.h"
-#include "integer_attribute.h"
+#include "model/tokens.h"
+#include "model/integer.h"
 
 extern FILE* yyin;
 

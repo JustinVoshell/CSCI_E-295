@@ -1,5 +1,5 @@
 #include "ScannerTestBase.h"
-#include "tokens.h"
+#include "model/tokens.h"
 
 class ScannerOperatorTests : public ScannerTestBase {};
 

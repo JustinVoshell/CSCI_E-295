@@ -12,15 +12,13 @@ clean :
 	@rm -f *.o UnitTests
 	@rm -rf ./data
 
-SCANNER_OBJ = scanner.o integer_attribute.o string_attribute.o code_table.o
-SCANNER_INC = tokens.h integer_attribute.h string_attribute.h code_table.h 
 UNIT_TESTS = ScannerTestBase.o ScannerIntegerTests.o ScannerKeywordTests.o ScannerOperatorTests.o ScannerCharacterTests.o ScannerStringTests.o ScannerCommentTests.o ScannerIdentifierTests.o ScannerWillenson2009FileTests.o
 
-UnitTests : $(SCANNER_OBJ) $(UNIT_TESTS) gtest.a 
-Scanner%Tests.o : ScannerTestBase.h $(SCANNER_INC) $(TEST_HEADERS)
-ScannerTestBase.o : ScannerTestBase.h $(SCANNER_INC) $(TEST_HEADERS) 
+UnitTests : $(SCANNER_OBJ) $(MODEL_OBJ) $(UNIT_TESTS) gtest.a 
+Scanner%Tests.o : ScannerTestBase.h $(SCANNER_INC) $(MODEL_INC) $(TEST_HEADERS)
+ScannerTestBase.o : ScannerTestBase.h $(SCANNER_INC) $(MODEL_INC) $(TEST_HEADERS) 
 
-vpath %.h $(jhv-include) $(jhv-test)/include $(jhv-redist-gtest)/src
+vpath %.h $(jhv-include) $(jhv-include)/model $(jhv-include)/scanner $(jhv-test)/include $(jhv-redist-gtest)/src
 vpath %.o $(jhv-bin)
 vpath %.cpp $(jhv-test)/src
 vpath %.cc $(jhv-redist-gtest)/src

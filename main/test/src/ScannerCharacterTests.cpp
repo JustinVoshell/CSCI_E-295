@@ -1,8 +1,5 @@
 #include "ScannerTestBase.h"
-
-extern "C" {
-#include "integer_attribute.h"
-}
+#include "model/integer.h"
 
 class ScannerCharacterTests : public ScannerTestBase {};
 

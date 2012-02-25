@@ -1,11 +1,5 @@
-/*
-	integer_attribute.h
-	Justin Voshell - justin.voshell@me.com
-	CSCI E-295 Spring 2012
-*/
-
-#ifndef INTEGER_ATTRIBUTE_H
-#define INTEGER_ATTRIBUTE_H
+#ifndef INTEGER_H_JHV9902116
+#define INTEGER_H_JHV9902116
 
 #define LITERAL_CHAR_MAX           255 
 #define LITERAL_SHORT_MAX        65535            
@@ -37,4 +31,4 @@ integer* integer_from_cstring(const char* text);
 integer* integer_from_char(const int charValue);
 integer* integer_from_octal_char(const char* text);
 
-#endif /*INTEGER_ATTRIBUTE_H*/
+#endif /*INTEGER_H_JHV9902116*/

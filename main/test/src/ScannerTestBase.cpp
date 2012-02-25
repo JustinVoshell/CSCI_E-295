@@ -5,9 +5,10 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "tokens.h"
-#include "integer_attribute.h"
-#include "string_attribute.h"
+
+#include "model/tokens.h"
+#include "model/integer.h"
+#include "model/string_buffer.h"
 	int yylex();
 }
 

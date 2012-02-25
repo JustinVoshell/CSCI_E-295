@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "integer_attribute.h"
+#include "model/integer.h"
 
 integer* integer_from_cstring(const char* string)
 {
