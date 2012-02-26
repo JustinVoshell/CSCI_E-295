@@ -44,5 +44,5 @@ TEST_F(ScannerOperatorTests, LeftBracket        ) { setInput("["  ); scanAndExpe
 TEST_F(ScannerOperatorTests, RightBracket       ) { setInput("]"  ); scanAndExpectSimpleToken(RIGHT_BRACKET       ); } 
 TEST_F(ScannerOperatorTests, LeftBrace          ) { setInput("{"  ); scanAndExpectSimpleToken(LEFT_BRACE          ); } 
 TEST_F(ScannerOperatorTests, RightBrace         ) { setInput("}"  ); scanAndExpectSimpleToken(RIGHT_BRACE         ); } 
-TEST_F(ScannerOperatorTests, StatementTerminator) { setInput(";"  ); scanAndExpectSimpleToken(STATEMENT_TERMINATOR); } 
+TEST_F(ScannerOperatorTests, StatementTerminator) { setInput(";"  ); scanAndExpectSimpleToken(SEMICOLON           ); } 
 TEST_F(ScannerOperatorTests, SequentialEval     ) { setInput(","  ); scanAndExpectSimpleToken(SEQUENTIAL_EVAL     ); } 

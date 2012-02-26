@@ -117,7 +117,7 @@ TEST_F(ScannerWillenson2009FileTests, Operators1)
 	scanAndExpectSimpleToken(BITWISE_OR);
 	scanAndExpectSimpleToken(GREATER);
 	scanAndExpectSimpleToken(RIGHT_PAREN);
-	scanAndExpectSimpleToken(STATEMENT_TERMINATOR);
+	scanAndExpectSimpleToken(SEMICOLON);
 	scanAndExpectInteger(LITERAL_INT, 9, NO_OVERFLOW);
 	scanAndExpectSimpleToken(DASH);
 	scanAndExpectSimpleToken(COLON);
@@ -205,7 +205,7 @@ TEST_F(ScannerWillenson2009FileTests, Operators2)
 	scanAndExpectSimpleToken(LEFT_BRACE);
 	scanAndExpectSimpleToken(RIGHT_BRACE);
 	scanAndExpectSimpleToken(SEQUENTIAL_EVAL);
-	scanAndExpectSimpleToken(STATEMENT_TERMINATOR);
+	scanAndExpectSimpleToken(SEMICOLON);
 	scanAndExpectSimpleToken(COLON);
 }
 

@@ -4,14 +4,16 @@
   #include <errno.h>
   #include <limits.h>
 
+	#include "model/node.h"
+	#define YYSTYPE struct node*
+	
+	#include "parse.h"
+	
 	#include "model/codes.h"
-	#include "model/tokens.h"
   #include "model/errors.h"
   #include "model/integer.h"
   #include "model/string_buffer.h"
- 
-  #define YYSTYPE void*
-  extern YYSTYPE yylval;
+
 	void yyerror(const char* message);
 	
 	int scan_integer_from_char(const char);
@@ -172,38 +174,55 @@ while               					return scan_token(WHILE);
 .                   					return scan_error(E_NO_MATCHING_TOKEN);
 
 %%
-	int scan_token(const int token_value)               { yylval = 0; return token_value; }
+	int scan_token(const int token_value)
+	{ 
+		yylval = 0;
+		return token_value;
+	}
 	
-	int scan_integer_from_char(const char value)        { yylval = (YYSTYPE)integer_from_char(value);       return LITERAL_NUMBER; }
-	int scan_integer_from_cstring(const char* value)    { yylval = (YYSTYPE)integer_from_cstring(value);    return LITERAL_NUMBER; }
-	int scan_integer_from_octal_char(const char* value) { yylval = (YYSTYPE)integer_from_octal_char(value); return LITERAL_NUMBER; }
+	int scan_integer_from_char(const char value)
+	{ 
+		yylval = node_literal_integer(integer_from_char(value));
+		return LITERAL_NUMBER;
+  }
 
-	int scan_begin_string() { BEGIN(S); return string_buffer_init(); }
-	int scan_end_string()   { BEGIN(0); yylval = (YYSTYPE)string_buffer(); return LITERAL_STRING; }
+	int scan_integer_from_cstring(const char* value)    
+	{ 
+		yylval = node_literal_integer(integer_from_cstring(value));
+		return LITERAL_NUMBER;
+	}
+	
+	int scan_integer_from_octal_char(const char* value) 
+	{ 
+		yylval = node_literal_integer(integer_from_octal_char(value)); 
+		return LITERAL_NUMBER;
+	}
+
+	int scan_begin_string() 
+	{ 
+		BEGIN(S);
+		return string_buffer_init();
+	}
+	
+	int scan_end_string()   
+	{ 
+		BEGIN(0);
+		yylval = node_literal_string(string_buffer()); 
+		return LITERAL_STRING;
+	}
 	
 	int scan_id(const char* string, const int length)
 	{
-		char* newString;
-
-		newString = (char *) malloc(sizeof(char) * (length + 1));
-
-		if (newString)
-		{
-			strcpy(newString, string);
-		}
+		char* name = (char *) malloc(sizeof(char) * (length + 1));
+		if (name) strcpy(name, string);
 		
-		yylval = (YYSTYPE)newString;
+		yylval = node_identifier(name);
 		return IDENTIFIER;
 	}
 	
 	int scan_error(int errorCode)
 	{
-		yylval = (YYSTYPE)errorCode;
+		yylval = node_error(errorCode);
 		yyerror(codes_get(errorCode));
 		return -1;
-	}
-	
-	void yyerror(const char* errorMessage)
-	{
-		fprintf(stderr, "[ERROR] line %i: %s", yylineno, errorMessage);
 	}

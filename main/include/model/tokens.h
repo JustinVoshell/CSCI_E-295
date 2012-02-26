@@ -61,7 +61,7 @@
 #define RIGHT_BRACKET         358
 #define LEFT_BRACE            359
 #define RIGHT_BRACE           360
-#define STATEMENT_TERMINATOR  361
+#define SEMICOLON             361
 #define SEQUENTIAL_EVAL       362
 
 int token_has_attribute(int token);
