@@ -1,78 +1,92 @@
-#include "scanner/scanner_printer.h"
+#include <stdio.h>
 
-#include "model/codes.h"
+#include "model/node.h"
 #include "model/tokens.h"
-#include "model/errors.h"
-#include "model/integer.h"
-#include "model/string_buffer.h"
+#include "model/resource.h"
+
+#include "scanner/scanner_printer.h"
 
 #define MAX_INLINE_STRLEN 30
 
-void sp_print_input(FILE* output, const char* input_name, const int line_number, const char* input_string, const int input_length)
+extern FILE *output_file;
+extern const char *input_filename;
+
+void sp_print_error(const enum error_type error_type)
 {
-  fprintf(output, "%s:%i:", input_name, line_number);
+	const char* error_message = resource(error_type);
+
+  if (error_message)
+  {
+    fprintf(output_file, "ERROR: %s\n", error_message);
+  }
+  else
+  {
+    fputs("UNKNOWN ERROR\n", output_file);
+  }
+}
+
+void sp_print_input(const int line_number, const char* input_string, const int input_length)
+{
+  fprintf(output_file, "%s:%i:", input_filename, line_number);
   
   if (input_length <= MAX_INLINE_STRLEN)
   {
-    fprintf(output, "%-30s\t", input_string);
+    fprintf(output_file, "%-30s\t", input_string);
   }
   else
   {
-    fprintf(output, "\n==>\n%s\n<==\n", input_string);
+    fprintf(output_file, "\n==>\n%s\n<==\n", input_string);
   }
 }
 
-void sp_print_id(FILE* output, const char* id)
+void sp_print_id_(const struct node *node)
 {
-  fprintf(output, "%s: %s\n", codes_get(IDENTIFIER), id);
+  fprintf(output_file, "%s: %s\n", resource(IDENTIFIER), node->data.name);
 }
 
-void sp_print_integer(FILE* output, const integer* integer)
+void sp_print_integer_(const struct node *node)
 {
-	fprintf(output, "%s\t", codes_get(LITERAL_NUMBER));
-  fprintf(output, "VALUE: %-12lu\t", integer->value);
-  fprintf(output, "TYPE: %-6s\t", codes_get(integer->type));
-  fprintf(output, "%s\n", codes_get(integer->overflow_flag));
+	fprintf(output_file, "%s\t",            resource(LITERAL_NUMBER));
+  fprintf(output_file, "VALUE: %-12lu\t", node->data.integer->value);
+  fprintf(output_file, "TYPE: %-6s\t",    resource(node->data.integer->type));
+  fprintf(output_file, "%s\n",            resource(node->data.integer->overflow));
 }
 
-void sp_print_string(FILE* output, const string* string_data) 
+void sp_print_string_(const struct node *node) 
 {
-  size_t idx;
-
-  if (string_data->length <= MAX_INLINE_STRLEN)
+  unsigned short idx;
+	const char *string_type_name = resource(LITERAL_STRING);
+	
+  if (node->data.string->length <= MAX_INLINE_STRLEN)
   {
-    fprintf(output, "%s\t", codes_get(LITERAL_STRING));
-
-    for (idx = 0; idx < string_data->length; idx++)
+    fprintf(output_file, "%s\t", string_type_name);
+    for (idx = 0; idx < node->data.string->length; idx++)
     {
-      fputc(string_data->buffer[idx], output);
+      fputc(node->data.string->buffer[idx], output_file);
     }
-
-    fputs("\n", output);
+    fputs("\n", output_file);
   }
   else
   {
-    fputs("\nSTRING==>\n", output);
-
-    for (idx = 0; idx < string_data->length; idx++)
+    fprintf(output_file, "\n%s==>\n", string_type_name);
+    for (idx = 0; idx < node->data.string->length; idx++)
     {
-      fputc(string_data->buffer[idx], output);
+      fputc(node->data.string->buffer[idx], output_file);
     }
-
-    fputs("\n<==STRING\n", output);
+    fprintf(output_file, "\n<==%s\n", string_type_name);
   }
 }
 
-void sp_print_error(FILE* output, const unsigned long error_code)
+void sp_print_node(const struct node* node)
 {
-  const char* error_message;
+	switch (node->node_type)
+	{
+		case NODE_ERROR:           { sp_print_error(node->data.error_type);   break; }
 
-  if ((error_message = codes_get(error_code)))
-  {
-    fprintf(output, "ERROR: %s\n", error_message);
-  }
-  else
-  {
-    fprintf(output, "UNKNOWN ERROR\n");
-  }
+		case NODE_IDENTIFIER:      { sp_print_id_(node);      break; }
+		case NODE_LITERAL_INTEGER: { sp_print_integer_(node); break; }
+		case NODE_LITERAL_STRING:  { sp_print_string_(node);  break; }
+
+		default: break;
+	}
 }

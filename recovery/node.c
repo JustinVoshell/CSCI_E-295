@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "model/node.h"
+#include "node.h"
 
 extern int yylineno;
 
@@ -100,11 +100,6 @@ struct node *node_error(enum error_type error_type)
 	return new_node;
 }
 
-struct node *node_function_declarator(struct node *declarator, struct node *parameter_list)
-{
-	return 0;
-}
-
 struct node *node_identifier(const char *name)
 {
 	struct node *new_node = node_factory(NODE_IDENTIFIER);
@@ -126,16 +121,6 @@ struct node *node_literal_string(struct string_data *literal_string)
 	return new_node;
 }
 
-struct node *node_parameter_declaration(struct node *type_specifier, struct node *declarator)
-{
-	return 0;
-}
-
-struct node *node_parameter_list(struct node *parameter_list, struct node *parameter_declaration)
-{
-	return 0;
-}
-
 struct node *node_pointer(struct node *pointer)
 {
 	struct node *new_node = node_factory(NODE_POINTER);
@@ -143,7 +128,7 @@ struct node *node_pointer(struct node *pointer)
 	return new_node;
 }
 
-struct node *node_type_specifier(enum integer_data_type integer_type)
+struct node *node_type_specifier(enum integer_type integer_type)
 {
 	struct node *new_node = node_factory(NODE_TYPE_SPECIFIER);
 	new_node->data.integer_type = integer_type;

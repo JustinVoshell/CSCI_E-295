@@ -5,24 +5,28 @@
 #include "parser/parser_printer.h"
 
 FILE *yyin;
-int yyparse();
+FILE *output_file;
+
+const char* input_filename;
+extern int yylineno;
+
 struct node *root_node;
-FILE *parser_output;
-const char* parser_input_name;
+int yyparse();
 
-int main(int argc, char **argv) {
-  int result;
+int main(int argc, char **argv) 
+{
+  int result = 0;
 
-  /* tell lex where to get input */
-  yyin = stdin;
-	parser_output = stdout;
-	parser_input_name = "stdin";
+ 	yyin = stdin;
+	output_file = stdout;
+	input_filename = "stdin";
 	
 	result = yyparse();
-	if (!result)
-	{
-		pp_print(root_node);
-	}
-
+	if (!result) pp_print(root_node);
   return result;
+}
+
+void yyerror(const char *error_message)
+{
+	fprintf(stderr, "%s:%d: error: %s", input_filename, yylineno, error_message);
 }

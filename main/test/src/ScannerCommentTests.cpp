@@ -1,5 +1,5 @@
 #include "ScannerTestBase.h"
-#include "model/integer.h"
+#include "model/integer_data.h"
 
 class ScannerCommentTests : public ScannerTestBase {};
 
@@ -60,8 +60,8 @@ TEST_F(ScannerCommentTests, LeavesOneSpace)
 	scanAndExpectIdentifier("A");
 	scanAndExpectIdentifier("B");
 	scanAndExpectIdentifier("B");
-	scanAndExpectInteger(LITERAL_CHAR, 12, NO_OVERFLOW);	
-	scanAndExpectInteger(LITERAL_CHAR, 34, NO_OVERFLOW);	
-	scanAndExpectInteger(LITERAL_CHAR, 56, NO_OVERFLOW);	
-	scanAndExpectInteger(LITERAL_CHAR, 78, NO_OVERFLOW);	
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 12, INTEGER_DATA_NO_OVERFLOW);	
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 34, INTEGER_DATA_NO_OVERFLOW);	
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 56, INTEGER_DATA_NO_OVERFLOW);	
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 78, INTEGER_DATA_NO_OVERFLOW);	
 }

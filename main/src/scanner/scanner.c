@@ -4,112 +4,108 @@
 
 #include "scanner/scanner_printer.h"
 
-#include "model/codes.h"
+#include "model/node.h"
+#include "model/resource.h"
 #include "model/tokens.h"
-#include "model/errors.h"
+#include "model/error_type.h"
 
 #define EXIT_OK 0
 #define EXIT_OUT_OF_MEMORY 1
 
-extern FILE* yyin;                      
 int yylex();                            
-extern char* yytext;                    
+extern FILE *yyin;                      
+extern char *yytext;                    
 extern int yyleng;                      
 extern int yylineno;                    
-void* yylval;                           
+struct node *yylval;                           
 
-FILE* output_;
-const char* input_name_;
+FILE *output_file;
+const char *input_filename;
 
-void open_(int argc, char** argv);
+void open_(int argc, char **argv);
 void close_();
-int process_(const int token, void* attribute);
+int process_(const int token, struct node *attribute);
+int token_has_attribute_(const int token);
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	int scan_result;
 	
 	open_(argc, argv);
-  codes_init();	
+  resource_init();	
 
   for (scan_result = yylex(); 0 != scan_result; scan_result = yylex())
   {  
-    if (scan_result !=0) sp_print_input(output_, input_name_, yylineno, yytext, yyleng);
-    else break;
+		if (scan_result <=0) break;
+		
+		sp_print_input(yylineno, yytext, yyleng);
+    if (process_(scan_result, yylval)) return EXIT_OUT_OF_MEMORY;
 
-    if (scan_result > 0)
-    {
-      if (process_(scan_result, yylval)) return EXIT_OUT_OF_MEMORY;
-    }
-    else 
-    {
-			int error_code = (unsigned long)yylval;
-      sp_print_error(output_, error_code);
-      
-			if (error_should_exit(error_code))
-			{
-        close_();
-        return E_OUT_OF_MEMORY == error_code ? EXIT_OUT_OF_MEMORY : EXIT_OK;
-      }
-    }
-  }
+		if (SCANNER_ERROR == scan_result && error_type_requires_exit(yylval->data.error_type)) break;
+	}
 
   close_();
   return EXIT_OK;
 }
 
-int process_(const int token, void* attribute)
+int process_(const int token, struct node *attribute)
 {
   const char* token_name;
 
-  if (!(token_name = codes_get(token)))
+  if (!(token_name = resource(token)))
   {
-    fprintf(output_, "ERROR: Unrecognized token: %i\n", token);
+    fprintf(output_file, "ERROR: Unrecognized token: %i\n", token);
     return 0;
   }
 
-  if (token_has_attribute(token)) 
+  if (token_has_attribute_(token)) 
   {
     if (!attribute)
     {
-      sp_print_error(output_, E_OUT_OF_MEMORY);
+      sp_print_error(ERROR_OUT_OF_MEMORY);
       return EXIT_OUT_OF_MEMORY;
     }
-  
-  	if (IDENTIFIER == token)            sp_print_id(output_, (char*)attribute); 
-  	else if (LITERAL_NUMBER == token)   sp_print_integer(output_, (integer*)attribute);
-  	else if (LITERAL_STRING == token)   sp_print_string(output_, (string*)attribute);
-  	free(attribute);
+		sp_print_node(attribute);
  	}
-  else fprintf(output_, "%s\n", token_name);
+  else
+	{
+		fprintf(output_file, "%s\n", token_name);
+	}
   return 0;
+}
+
+int token_has_attribute_(const int token)
+{
+	return (IDENTIFIER == token ||
+					LITERAL_STRING == token ||
+					LITERAL_NUMBER == token) ? 1 : 0;
 }
 
 void open_(int argc, char** argv)
 {
   if (argc < 2 || !strcmp("-", argv[1])) 
   {
-		input_name_ = "stdin";
+		input_filename = "stdin";
     yyin = stdin;
   }
   else
   {
-		input_name_ = argv[1];
-    yyin = fopen(input_name_, "r");
+		input_filename = argv[1];
+    yyin = fopen(input_filename, "r");
   }
 
   if (argc < 3 || !strcmp("-", argv[2]))
   {
-    output_ = stdout;
+    output_file = stdout;
   }
   else
   {
-    output_ = fopen(argv[2], "w");
+    output_file = fopen(argv[2], "w");
   }
 }
 
 void close_()
 {
-  if (output_ != stdout) fclose(output_);
+  if (output_file != stdout) fclose(output_file);
   if (yyin != stdin) fclose(yyin);
 }

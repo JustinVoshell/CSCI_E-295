@@ -2,17 +2,18 @@
 #include <stdio.h>
 #include <errno.h>
 #include "model/tokens.h"
-#include "model/integer.h"
+#include "model/integer_data.h"
 
-extern FILE* yyin;
+extern FILE *yyin;
+extern const char *input_filename;
 
 class ScannerWillenson2009FileTests : public ScannerTestBase 
 {
 protected:
 	static void SetUpTestCase()
 	{
-		const char* filename = "data/Willenson_lexer_2009.c";
-		yyin = fopen(filename, "r");
+		input_filename = "data/Willenson_lexer_2009.c";
+		yyin = fopen(input_filename, "r");
 		ASSERT_TRUE(yyin);
 	}
 	
@@ -27,16 +28,16 @@ protected:
 
 TEST_F(ScannerWillenson2009FileTests, Digits)
 {
-	scanAndExpectInteger(LITERAL_CHAR, 0, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 1, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 2, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 3, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 4, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 5, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 6, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 7, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 8, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_CHAR, 9, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 0, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 1, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 2, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 3, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 4, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 5, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 6, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 7, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 8, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 9, INTEGER_DATA_NO_OVERFLOW);
 }
 
 TEST_F(ScannerWillenson2009FileTests, Letters)
@@ -118,7 +119,7 @@ TEST_F(ScannerWillenson2009FileTests, Operators1)
 	scanAndExpectSimpleToken(GREATER);
 	scanAndExpectSimpleToken(RIGHT_PAREN);
 	scanAndExpectSimpleToken(SEMICOLON);
-	scanAndExpectInteger(LITERAL_INT, 9, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 9, INTEGER_DATA_NO_OVERFLOW);
 	scanAndExpectSimpleToken(DASH);
 	scanAndExpectSimpleToken(COLON);
 	scanAndExpectSimpleToken(QUESTION_MARK);
@@ -135,7 +136,7 @@ TEST_F(ScannerWillenson2009FileTests, Identifiers)
 {
 	scanAndExpectIdentifier("dsjfsk");
 	scanAndExpectIdentifier("h76567");
-	scanAndExpectInteger(LITERAL_CHAR, 6, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 6, INTEGER_DATA_NO_OVERFLOW);
 	scanAndExpectIdentifier("jhgjh");
 	scanAndExpectIdentifier("_jhgj");
 	scanAndExpectIdentifier("_87678");
@@ -151,7 +152,7 @@ TEST_F(ScannerWillenson2009FileTests, Keywords)
 	scanAndExpectSimpleToken(ELSE);
 	scanAndExpectSimpleToken(GOTO);
 	scanAndExpectSimpleToken(SIGNED);
-	scanAndExpectInteger(LITERAL_INT, 789769876, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 789769876, INTEGER_DATA_NO_OVERFLOW);
 	scanAndExpectIdentifier("ulnsigned");
 	scanAndExpectSimpleToken(CHAR);
 	scanAndExpectSimpleToken(IF);
@@ -211,26 +212,26 @@ TEST_F(ScannerWillenson2009FileTests, Operators2)
 
 TEST_F(ScannerWillenson2009FileTests, IntegerLiterals)
 {
-	scanAndExpectInteger(LITERAL_SHORT,      6767, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT,   326498724, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT,      6767, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT,   326498724, INTEGER_DATA_NO_OVERFLOW);
 }
 
 TEST_F(ScannerWillenson2009FileTests, CharacterLiterals)
 {
-	scanAndExpectInteger(LITERAL_INT, 50, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 97, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT,  9, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 10, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT,  8, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 13, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 12, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 11, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 92, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 39, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 34, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT,  7, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 63, NO_OVERFLOW);
-	scanAndExpectInteger(LITERAL_INT, 65, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 50, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 97, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT,  9, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 10, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT,  8, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 13, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 12, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 11, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 92, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 39, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 34, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT,  7, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 63, INTEGER_DATA_NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 65, INTEGER_DATA_NO_OVERFLOW);
 }
 
 TEST_F(ScannerWillenson2009FileTests, StringLiterals)
@@ -257,5 +258,5 @@ TEST_F(ScannerWillenson2009FileTests, Leftovers)
 	scanAndExpectIdentifier("abbaface");
 	scanAndExpectSimpleToken(ASTERISK);
 	scanAndExpectSimpleToken(DIVISION);
-	scanAndExpectInteger(LITERAL_SHORT, 1425, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 1425, INTEGER_DATA_NO_OVERFLOW);
 }

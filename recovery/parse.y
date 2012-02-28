@@ -1,12 +1,13 @@
 %{
-	#include <stdio.h>
-	#include "model/node.h"
-	#define YYSTYPE struct node*
-
-	void yyerror(const char*);	
-	extern struct node *root_node; 
-
-	int yylex();
+  #include <stdio.h>
+  #include "node.h"
+	
+  #define YYSTYPE struct node*
+	
+  int yylex();
+  void yyerror(const char*);
+	
+  extern struct node *root_node; 
 %}
 
 %debug
@@ -84,10 +85,6 @@
 root : declaration_list { root_node = $1 }
 ;
 
-array_declarator : direct_declarator LEFT_BRACKET LITERAL_NUMBER RIGHT_BRACKET { $$ = node_array_declarator($1, $3); }
-                 | direct_declarator LEFT_BRACKET RIGHT_BRACKET                { $$ = node_array_declarator($1,  0); }
-;
-
 declaration : type_specifier declarator_list SEMICOLON { $$ = node_declaration($1, $2); }
 ;
 
@@ -100,39 +97,38 @@ declarator : pointer direct_declarator { $$ = node_declarator($1, $2); }
 ;
 
 declarator_list : declarator                                 { $$ = node_declarator_list( 0, $1); }
-								| declarator_list SEQUENTIAL_EVAL declarator { $$ = node_declarator_list($1, $3); }
+		| declarator_list SEQUENTIAL_EVAL declarator { $$ = node_declarator_list($1, $3); }
 ;
 
 direct_declarator : IDENTIFIER                        { $$ = $1 }
                   | LEFT_PAREN declarator RIGHT_PAREN { $$ = $2 }
-								  | array_declarator                  { $$ = $1 } 
 ;
 
 pointer : ASTERISK          { $$ = node_pointer( 0)  }
         | pointer ASTERISK  { $$ = node_pointer($1); }
 ;
 
-type_specifier : VOID               { $$ = node_type_specifier(INTEGER_DATA_VOID);           }
-               | CHAR               { $$ = node_type_specifier(INTEGER_DATA_SIGNED_CHAR);    }
-               | SIGNED CHAR        { $$ = node_type_specifier(INTEGER_DATA_SIGNED_CHAR);    }
-							 | UNSIGNED CHAR      { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_CHAR);  }
-							 | SHORT              { $$ = node_type_specifier(INTEGER_DATA_SIGNED_SHORT);   }
-							 | SIGNED SHORT       { $$ = node_type_specifier(INTEGER_DATA_SIGNED_SHORT);   }
-							 | SHORT INT          { $$ = node_type_specifier(INTEGER_DATA_SIGNED_SHORT);   }
-							 | SIGNED SHORT INT   { $$ = node_type_specifier(INTEGER_DATA_SIGNED_SHORT);   }
-							 | UNSIGNED SHORT     { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_SHORT); }
-							 | UNSIGNED SHORT INT { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_SHORT); }
-						   | SIGNED             { $$ = node_type_specifier(INTEGER_DATA_SIGNED_INT);     }
-						   | INT                { $$ = node_type_specifier(INTEGER_DATA_SIGNED_INT);     }
-						   | SIGNED INT         { $$ = node_type_specifier(INTEGER_DATA_SIGNED_INT);     }
-						   | UNSIGNED           { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_INT);   }
-						   | UNSIGNED INT       { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_INT);   }
-							 | LONG 						  { $$ = node_type_specifier(INTEGER_DATA_SIGNED_LONG);    }
-							 | SIGNED LONG        { $$ = node_type_specifier(INTEGER_DATA_SIGNED_LONG);    }
-							 | LONG INT           { $$ = node_type_specifier(INTEGER_DATA_SIGNED_LONG);    }
-							 | SIGNED LONG INT    { $$ = node_type_specifier(INTEGER_DATA_SIGNED_LONG);    }
-							 | UNSIGNED LONG      { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_LONG);  }
-							 | UNSIGNED LONG INT  { $$ = node_type_specifier(INTEGER_DATA_UNSIGNED_LONG);  }
+type_specifier : VOID               { $$ = node_type_specifier(INTEGER_TYPE_VOID);           }
+               | CHAR               { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_CHAR);    }
+               | SIGNED CHAR        { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_CHAR);    }
+               | UNSIGNED CHAR      { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_CHAR);  }
+	       | SHORT              { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_SHORT);   }
+	       | SIGNED SHORT       { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_SHORT);   }
+	       | SHORT INT          { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_SHORT);   }
+	       | SIGNED SHORT INT   { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_SHORT);   }
+	       | UNSIGNED SHORT     { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_SHORT); }
+               | UNSIGNED SHORT INT { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_SHORT); }
+	       | SIGNED             { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_INT);     }
+	       | INT                { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_INT);     }
+	       | SIGNED INT         { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_INT);     }
+	       | UNSIGNED           { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_INT);   }
+	       | UNSIGNED INT       { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_INT);   }
+	       | LONG 		    { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_LONG);    }
+	       | SIGNED LONG        { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_LONG);    }
+               | LONG INT           { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_LONG);    }
+	       | SIGNED LONG INT    { $$ = node_type_specifier(INTEGER_TYPE_SIGNED_LONG);    }
+	       | UNSIGNED LONG      { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_LONG);  }
+	       | UNSIGNED LONG INT  { $$ = node_type_specifier(INTEGER_TYPE_UNSIGNED_LONG);  }
 ;
 
 %%

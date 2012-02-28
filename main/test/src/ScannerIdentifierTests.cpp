@@ -1,5 +1,5 @@
 #include "ScannerTestBase.h"
-#include "model/integer.h"
+#include "model/integer_data.h"
 
 class ScannerIdentifierTests : public ScannerTestBase {};
 
@@ -24,9 +24,9 @@ TEST_F(ScannerIdentifierTests, LettersAndNumbers)
 	scanAndExpectIdentifier("aA4");
 	scanAndExpectIdentifier("AA5");
 	scanAndExpectIdentifier("Aa6");
-	scanAndExpectInteger(LITERAL_CHAR, 31, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 31, INTEGER_DATA_NO_OVERFLOW);
 	scanAndExpectIdentifier("st");
-	scanAndExpectInteger(LITERAL_CHAR, 0, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 0, INTEGER_DATA_NO_OVERFLOW);
 	scanAndExpectIdentifier("a0a0");
 }
 
@@ -48,6 +48,6 @@ TEST_F(ScannerIdentifierTests, Underscores)
 	scanAndExpectIdentifier("A_AA");
 	scanAndExpectIdentifier("a1___");
 	scanAndExpectIdentifier("____1");
-	scanAndExpectInteger(LITERAL_CHAR, 0, NO_OVERFLOW);
+	scanAndExpectInteger(INTEGER_DATA_SIGNED_INT, 0, INTEGER_DATA_NO_OVERFLOW);
 	scanAndExpectIdentifier("_a_1");
 }

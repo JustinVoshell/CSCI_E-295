@@ -1,19 +1,24 @@
 #include "ScannerTestBase.h"
 #include "gtest/gtest.h"
 
-extern "C" {
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
+extern "C" 
+{
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <unistd.h>
 
-#include "model/tokens.h"
-#include "model/integer.h"
-#include "model/string_buffer.h"
+	#include "model/node.h"
+	#include "model/tokens.h"
+
 	int yylex();
 }
 
-void* yylval;
-extern FILE* yyin;
+extern FILE *yyin;
+extern struct node *yylval;
+int yylex();
+
+const char *input_filename;
+FILE *output_file = stdout;
 
 void ScannerTestBase::SetUp()
 {
@@ -24,7 +29,9 @@ void ScannerTestBase::SetUp()
   ASSERT_TRUE(yyin);
 
   test_input = fdopen(fds[1], "w");
-  ASSERT_TRUE(test_input);	
+  ASSERT_TRUE(test_input);
+
+	input_filename = "test_input";
 }
 
 void ScannerTestBase::TearDown()
@@ -32,7 +39,7 @@ void ScannerTestBase::TearDown()
 	EXPECT_EQ(0, yylex());
 }
 
-void ScannerTestBase::setInput(const char* input_string)
+void ScannerTestBase::setInput(const char *input_string)
 {
 	fputs(input_string, test_input);
 	fclose(test_input);
@@ -44,69 +51,55 @@ void ScannerTestBase::scanAndExpectSimpleToken(const int expected_token)
   EXPECT_EQ(0ul, yylval);
 }
 
-void ScannerTestBase::scanAndExpectIdentifier(const char* expectedValue)
+void ScannerTestBase::scanAndExpectIdentifier(const char *expected_name)
 {
 	ASSERT_EQ(IDENTIFIER, yylex());
-	expectIdentifier((const char*)yylval, expectedValue);
+	ASSERT_TRUE(yylval);
+	
+	expectIdentifier(yylval->data.name, expected_name);
 	free(yylval);
 }
 
-void ScannerTestBase::scanAndExpectInteger(const integer_representation expectedType, const unsigned long expectedValue, const overflow expectedOverflow)
+void ScannerTestBase::scanAndExpectInteger(const integer_data_type expected_type, const unsigned long expected_value, const integer_data_overflow expected_overflow)
 {		
 	ASSERT_EQ(LITERAL_NUMBER, yylex());
-	expectInteger((integer*)yylval, expectedType, expectedValue, expectedOverflow);
+	ASSERT_TRUE(yylval);
+	
+	expectInteger(yylval->data.integer, expected_type, expected_value, expected_overflow);
 	free(yylval);
 }
 
-void ScannerTestBase::scanAndExpectString(const char* expectedString, const unsigned long expectedLength)
+void ScannerTestBase::scanAndExpectString(const char *expected_value, const unsigned short expected_length)
 {
 	ASSERT_EQ(LITERAL_STRING, yylex());
-	expectString((string*)yylval, expectedString, expectedLength);
+	ASSERT_TRUE(yylval);
+	
+	expectString(yylval->data.string, expected_value, expected_length);
 	free(yylval);
 }	
 
-void ScannerTestBase::expectIdentifier(const char* actualIdentifier, const char* expectedIdentifier)
+void ScannerTestBase::expectIdentifier(const char *actual, const char *expected_name)
 {
-	if (0 == actualIdentifier)
-	{
-		ADD_FAILURE();
-		return;
-	}
-	
-	ASSERT_STREQ(expectedIdentifier, actualIdentifier);
+	ASSERT_TRUE(actual);
+	EXPECT_STREQ(actual, expected_name);
 }
 
-void ScannerTestBase::expectInteger(integer* actualInteger, const integer_representation expectedType, const unsigned long expectedValue, const overflow expectedOverflow)
+void ScannerTestBase::expectInteger(const integer_data *actual, const integer_data_type expected_type, const unsigned long expected_value, const integer_data_overflow expected_overflow)
 {
-	if (NULL == actualInteger)
-	{
-		ADD_FAILURE();
-		return;
-	}
-		
-	if (!(0 == expectedOverflow || 1 == expectedOverflow))
-	{
-		ADD_FAILURE();
-	}
-	 else
-	{			
-		EXPECT_EQ(actualInteger->type, expectedType);
-		EXPECT_EQ(actualInteger->value, expectedValue);
-		EXPECT_EQ(actualInteger->overflow_flag, expectedOverflow);
-	}
+	ASSERT_TRUE(actual);
+
+	EXPECT_EQ(expected_type, actual->type);
+	EXPECT_EQ(expected_value, actual->value);
+	EXPECT_EQ(expected_overflow, actual->overflow);
 }
 
-void ScannerTestBase::expectString(string* actualString, const char* expectedString, const unsigned long expectedLength)
+void ScannerTestBase::expectString(const string_data *actual, const char *expected_value, const unsigned short expected_length)
 {
-	if (0 == actualString)
-	{
-		ADD_FAILURE();
-		return;
-	}
+	ASSERT_TRUE(actual);
+	ASSERT_EQ(expected_length, actual->length);
 	
-	ASSERT_EQ(actualString->length, expectedLength);
-	for (unsigned long idx = 0; idx < expectedLength; idx++)
+	for (unsigned short idx = 0; idx < expected_length; idx++)
 	{
-		ASSERT_EQ(actualString->buffer[idx], expectedString[idx]);
+		ASSERT_EQ(expected_value[idx], actual->buffer[idx]);
 	}
 }

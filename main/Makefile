@@ -16,13 +16,19 @@ export jhv-test-bin
 jhv-redist-gtest := $(PWD)/redist/gtest-1.6.0
 export jhv-redist-gtest
 
+parser:
+	@cd $(jhv-bin); make parser;
+
+scanner:
+	@cd $(jhv-bin); make scanner;
+
 all : 
 	@cd $(jhv-bin); make all
 
 clean :
 	@cd $(jhv-bin); make clean
 
-test : all
-	@cd $(jhv-test-bin); make test
+test : 
+	@cd $(jhv-bin); make test
 
 .PHONY : all clean test

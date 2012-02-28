@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 
+struct node* yylval;
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);

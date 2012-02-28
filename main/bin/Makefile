@@ -2,53 +2,49 @@
 # Justin Voshell - justin.voshell@me.com
 # CSCI E-295 Spring 2012
 
-all : scanner parser
-	@cd $(jhv-test-bin); make all
+model_objects := node.o integer_data.o string_data.o error_type.o
+model_includes := node.h integer_data.h string_data.h error_type.h 
+MODEL_INCLUDES := $(model_includes) resource.h tokens.h
+export MODEL_INCLUDES
 
-MODEL_OBJ = codes.o errors.o tokens.o integer.o string_buffer.o node.o
-export MODEL_OBJ
+scanner_objects := scanner_scan.o scanner_resource.o 
+SCANNER_OBJECTS := $(scanner_objects) $(model_objects)
+export SCANNER_OBJECTS
 
-MODEL_INC = codes.h errors.h tokens.h integer.h string_buffer.h node.h
-export MODEL_INC
+parser_objects := parser_parse.o parser_scan.o parser_resource.o
+PARSER_OBJECTS := $(parser_objects) $(model_objects)
+export PARSER_OBJECTS
 
-SCANNER_OBJ = scan.o scanner_printer.o
-export SCANNER_OBJ
+$(model_objects): $(model_includes)
 
-SCANNER_INC = scanner_printer.h
-export SCANNER_INC
+$(scanner_objects): scanner_%.o: %.c 
+	$(COMPILE.c) -o $@ $<
 
-PARSER_OBJ = parse.o parser_scan.o parser_printer.o  
-export PARSER_OBJ
+$(parser_objects): parser_%.o: %.c
+	$(COMPILE.c) -o $@ $<
 
-PARSER_INC = parser_printer.h 
-export PARSER_INC
-
-scanner : $(SCANNER_OBJ) $(MODEL_OBJ)
-parser : $(PARSER_OBJ) $(MODEL_OBJ)
-
-%.o : scanner/%.c $(SCANNER_INC)
-%.o : parser/%.c $(PARSER_INC)
-%.o : model/%.c $(MODEL_INC)
+%.c : %.l
+	$(LEX) $(LFLAGS) -o $@ $<
 
 %.c : %.y
 	$(YACC.y) -o $@ $<
 
 clean :
-	@rm *.o *.h *.output scanner parser
+	@rm *.o *.h *.c *.output scanner parser
 	@cd $(jhv-test-bin); make clean
 
 vpath %.c $(jhv-src)/model $(jhv-src)/scanner $(jhv-src)/parser 
-vpath %.h $(jhv-include)/model $(jhv-include)/scanner $(jhv-include)/parser $(jhv-src)/parser
+vpath %.h $(jhv-include) $(jhv-include)/model $(jhv-include)/scanner $(jhv-include)/parser $(jhv-bin)
 vpath %.l $(jhv-src)/scanner $(jhv-src)/parser
 vpath %.y $(jhv-src)/parser
 
 # COMPILE.c
 CC = gcc
 CFLAGS += -g -Wall -Wextra -pedantic
-CPPFLAGS += -I $(jhv-include) -I $(jhv-include)/model -I $(jhv-include)/scanner
+CPPFLAGS += -I $(jhv-include) -I $(jhv-bin)
 
 # LINK.o
-LDLIBS += -lfl -ll -pthread 
+LDLIBS += -lfl -ll -pthread
 
 # COMPILE.l
 LEX = flex
@@ -58,4 +54,23 @@ LEXFLAGS +=
 YACC = bison
 YFLAGS += -d
 
-.PHONY : all clean
+.PHONY : all clean test
+
+all: scanner parser
+	@cd $(jhv-test-bin); make all
+
+test: scanner
+	@cd $(jhv-test-bin); make test
+	
+scanner: scanner_printer.o $(SCANNER_OBJECTS)
+scanner: LDFLAGS += -DSTANDALONE_SCANNER
+
+scanner.o: CPPFLAGS += -DSTANDALONE_SCANNER
+scanner.o: scanner_printer.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES)
+
+scanner_printer.o: CPPFLAGS += -DSTANDALONE_SCANNER
+scanner_printer.o: scanner_printer.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES)
+
+parser: parser_printer.o $(PARSER_OBJECTS)
+parser.o: parser_printer.h $(PARSER_OBJECTS) $(MODEL_INCLUDES) parse.h
+parser_printer.o: parser_printer.h $(PARSER_OBJECTS) $(MODEL_INCLUDES) parse.h

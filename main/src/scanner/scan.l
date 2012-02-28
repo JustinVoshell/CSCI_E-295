@@ -4,16 +4,19 @@
   #include <errno.h>
   #include <limits.h>
 
-	#include "model/codes.h"
-	#include "model/tokens.h"
-  #include "model/errors.h"
-  #include "model/integer.h"
-  #include "model/string_buffer.h"
- 
-  #define YYSTYPE void*
+	#include "model/node.h" 
+  #define YYSTYPE struct node*
+
+  #ifdef STANDALONE_SCANNER
   extern YYSTYPE yylval;
-	void yyerror(const char* message);
-	
+  #endif
+
+  #include "model/tokens.h"
+	#include "model/resource.h"
+  #include "model/error_type.h"
+  #include "model/integer_data.h"
+  #include "model/string_data.h"
+
 	int scan_integer_from_char(const char);
 	int scan_integer_from_cstring(const char*);
 	int scan_integer_from_octal_char(const char*);
@@ -21,9 +24,9 @@
 	int scan_begin_string();
 	int scan_end_string();
 	
-	int scan_id(const char* text, const int length);
+	int scan_id(const char *name, const int length);
 	int scan_token(const int tokenValue);
-	int scan_error(const int code);
+	int scan_error(const enum error_type error_type);
 %}
 
 %option yylineno                        
@@ -57,13 +60,13 @@ string_char                    [[:print:]]{-}[\\\n\"]+
 <X>{comment_body}             ;                 
 <X>{comment_bodyStars}      	;                    
 <X>\n                  				;                   
-<X><<EOF>>             				return scan_error(E_EOF_COMMENT);
+<X><<EOF>>             				return scan_error(ERROR_EOF_COMMENT);
 <X>{comment_end}             	BEGIN(0);            
 
 {num}             					 	return scan_integer_from_cstring(yytext);
 
 \'[[:print:]]{-}[\\\n\']\' 	  return scan_integer_from_char(yytext[1]);
-\'\'                					return scan_error(E_BAD_LITERAL_CHAR);
+\'\'                					return scan_error(ERROR_BAD_LITERAL_CHAR);
 \'\\a\'           						return scan_integer_from_char('\a');
 \'\\b\'           						return scan_integer_from_char('\b');
 \'\\f\'           						return scan_integer_from_char('\f');
@@ -76,34 +79,34 @@ string_char                    [[:print:]]{-}[\\\n\"]+
 \'\\\"\'          						return scan_integer_from_char('\"'); 
 \'\\\\\'          						return scan_integer_from_char('\\');
 \'{octal_literal}\' 					return scan_integer_from_octal_char(yytext); 
-\'{bad_octal_literal}\'       return scan_error(E_BAD_OCTAL_LITERAL);
+\'{bad_octal_literal}\'       return scan_error(ERROR_BAD_OCTAL_ESCAPE);
 
 
 \'                						BEGIN(BAD_CHAR);
-<BAD_CHAR>[^\n\']+           	return scan_error(E_BAD_LITERAL_CHAR);
-<BAD_CHAR>\n                 	return scan_error(E_UNTERM_CHAR);
-<BAD_CHAR><<EOF>>            	return scan_error(E_EOF_CHAR);
+<BAD_CHAR>[^\n\']+           	return scan_error(ERROR_BAD_LITERAL_CHAR);
+<BAD_CHAR>\n                 	return scan_error(ERROR_UNTERM_CHAR);
+<BAD_CHAR><<EOF>>            	return scan_error(ERROR_EOF_CHAR);
 <BAD_CHAR>"'"                	BEGIN(0);
 
-\"                						if (scan_begin_string()) return E_OUT_OF_MEMORY;
+\"                						if (scan_begin_string()) return ERROR_OUT_OF_MEMORY;
 <S>\\\n              				  ; /* continuation */                
-<S>\\                				  return scan_error(E_BAD_CHAR_ESCAPE);
-<S>\\a               				  if (string_buffer_add_char('\a')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\b               				  if (string_buffer_add_char('\b')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\f               				  if (string_buffer_add_char('\f')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\n               				  if (string_buffer_add_char('\n')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\t               				  if (string_buffer_add_char('\t')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\r               				  if (string_buffer_add_char('\r')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\v               				  if (string_buffer_add_char('\v')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\\?               				if (string_buffer_add_char('\?')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\\'              				  if (string_buffer_add_char('\'')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\\"              				  if (string_buffer_add_char('\"')) return scan_error(E_OUT_OF_MEMORY);
-<S>\\\\              				  if (string_buffer_add_char('\\')) return scan_error(E_OUT_OF_MEMORY);                                                              
-<S>{octal_literal}      		  if (string_buffer_add_octal_char(yytext)) return scan_error(E_OUT_OF_MEMORY);
-<S>{bad_octal_literal} 				return scan_error(E_BAD_OCTAL_LITERAL);
-<S>\n                  				return scan_error(E_UNTERM_STR);
-<S><<EOF>>             				return scan_error(E_EOF_STR);
-<S>{string_char}  						if (string_buffer_add_cstring(yytext, yyleng)) return scan_error(E_OUT_OF_MEMORY);
+<S>\\                				  return scan_error(ERROR_BAD_CHAR_ESCAPE);
+<S>\\a               				  if (string_data_add_char('\a')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\b               				  if (string_data_add_char('\b')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\f               				  if (string_data_add_char('\f')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\n               				  if (string_data_add_char('\n')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\t               				  if (string_data_add_char('\t')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\r               				  if (string_data_add_char('\r')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\v               				  if (string_data_add_char('\v')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\\?               				if (string_data_add_char('\?')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\\'              				  if (string_data_add_char('\'')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\\"              				  if (string_data_add_char('\"')) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>\\\\              				  if (string_data_add_char('\\')) return scan_error(ERROR_OUT_OF_MEMORY);                                                              
+<S>{octal_literal}      		  if (string_data_add_octal_char(yytext)) return scan_error(ERROR_OUT_OF_MEMORY);
+<S>{bad_octal_literal} 				return scan_error(ERROR_BAD_OCTAL_ESCAPE);
+<S>\n                  				return scan_error(ERROR_UNTERM_STR);
+<S><<EOF>>             				return scan_error(ERROR_EOF_STR);
+<S>{string_char}  						if (string_data_add_cstring(yytext, yyleng)) return scan_error(ERROR_OUT_OF_MEMORY);
 <S>\"													return scan_end_string();
                    
 break              						return scan_token(BREAK);
@@ -169,41 +172,57 @@ while               					return scan_token(WHILE);
 ";"                 					return scan_token(SEMICOLON);   
 ","                 					return scan_token(SEQUENTIAL_EVAL);  
 
-.                   					return scan_error(E_NO_MATCHING_TOKEN);
+.                   					return scan_error(ERROR_NO_MATCHING_TOKEN);
 
 %%
-	int scan_token(const int token_value)               { yylval = 0; return token_value; }
-	
-	int scan_integer_from_char(const char value)        { yylval = (YYSTYPE)integer_from_char(value);       return LITERAL_NUMBER; }
-	int scan_integer_from_cstring(const char* value)    { yylval = (YYSTYPE)integer_from_cstring(value);    return LITERAL_NUMBER; }
-	int scan_integer_from_octal_char(const char* value) { yylval = (YYSTYPE)integer_from_octal_char(value); return LITERAL_NUMBER; }
+	int scan_token(const int token_value)
+	{ 
+		yylval = 0;
+		return token_value;
+	}
 
-	int scan_begin_string() { BEGIN(S); return string_buffer_init(); }
-	int scan_end_string()   { BEGIN(0); yylval = (YYSTYPE)string_buffer(); return LITERAL_STRING; }
-	
+	int scan_integer_from_char(const char value)
+	{ 
+		yylval = node_literal_integer(integer_data_from_char(value));
+		return LITERAL_NUMBER;
+	}
+
+	int scan_integer_from_cstring(const char* value)    
+	{ 
+		yylval = node_literal_integer(integer_data_from_cstring(value));
+		return LITERAL_NUMBER;
+	}
+
+	int scan_integer_from_octal_char(const char* value) 
+	{ 
+		yylval = node_literal_integer(integer_data_from_octal_char(value)); 
+		return LITERAL_NUMBER;
+	}
+
+	int scan_begin_string() 
+	{ 
+		BEGIN(S);
+		return string_data_new_buffer();
+	}
+
+	int scan_end_string()   
+	{ 
+		BEGIN(0);
+		yylval = node_literal_string(string_data_from_buffer()); 
+		return LITERAL_STRING;
+	}
+
 	int scan_id(const char* string, const int length)
 	{
-		char* newString;
-
-		newString = (char *) malloc(sizeof(char) * (length + 1));
-
-		if (newString)
-		{
-			strcpy(newString, string);
-		}
-		
-		yylval = (YYSTYPE)newString;
+		char* name = (char *) malloc(sizeof(char) * (length + 1));
+		if (name) strcpy(name, string);
+	
+		yylval = node_identifier(name);
 		return IDENTIFIER;
 	}
-	
-	int scan_error(int errorCode)
+
+	int scan_error(enum error_type error_type)
 	{
-		yylval = (YYSTYPE)errorCode;
-		yyerror(codes_get(errorCode));
-		return -1;
-	}
-	
-	void yyerror(const char* errorMessage)
-	{
-		fprintf(stderr, "[ERROR] line %i: %s", yylineno, errorMessage);
+		yylval = node_error(error_type);
+		return SCANNER_ERROR;
 	}

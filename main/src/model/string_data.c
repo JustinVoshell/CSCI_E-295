@@ -1,7 +1,9 @@
+#include <stdlib.h>
 #include <string.h>
 
-#include "model/string_buffer.h"
-#include "model/integer.h"
+#include "model/node.h"
+#include "model/string_data.h"
+#include "model/integer_data.h"
 
 char* string_buffer_ = 0;
 char* string_buffer_cursor_ = 0;
@@ -12,12 +14,12 @@ int string_buffer_remaining_()
   {
     return 0;
   }
-  return MAX_STR_LEN - (string_buffer_cursor_ - string_buffer_);
+  return STRING_BUFFER_LENGTH - (string_buffer_cursor_ - string_buffer_);
 }
 	
-int string_buffer_init()
+int string_data_new_buffer()
 {
-  if (!(string_buffer_ = malloc(MAX_STR_LEN*sizeof(char) + 1)))
+  if (!(string_buffer_ = malloc((STRING_BUFFER_LENGTH * sizeof(char) )+ 1)))
   {
     return 1;
   }
@@ -25,7 +27,7 @@ int string_buffer_init()
   return 0;
 }
 
-int string_buffer_add_char(const char charValue)
+int string_data_add_char(const char charValue)
 {
   if (string_buffer_remaining_() > 1)
   {
@@ -35,13 +37,13 @@ int string_buffer_add_char(const char charValue)
   return 1;
 }
 
-int string_buffer_add_octal_char(const char* octalLiteral)
+int string_data_add_octal_char(const char* octalLiteral)
 {
-  integer* integer;
+  struct integer_data *integer;
 
   if (string_buffer_remaining_() > 1)
   {
-    integer = integer_from_octal_char(octalLiteral);
+    integer = integer_data_from_octal_char(octalLiteral);
     if (!integer)
     {
       return 1;
@@ -52,7 +54,7 @@ int string_buffer_add_octal_char(const char* octalLiteral)
   return 1;
 }
 
-int string_buffer_add_cstring(const char* string, const int length)
+int string_data_add_cstring(const char* string, const int length)
 {
   if (string_buffer_remaining_() > (length + 1))
   {
@@ -63,15 +65,15 @@ int string_buffer_add_cstring(const char* string, const int length)
   return 1;
 }
 
-string* string_buffer()
+struct string_data *string_data_from_buffer()
 {
-  string* new_string = malloc(sizeof(string));
+  struct string_data *new_string = malloc(sizeof(struct string_data));
   if (!new_string)
   {
     return new_string;
   }
   new_string->length = string_buffer_cursor_ - string_buffer_;
-  new_string->size = MAX_STR_LEN + 1;
+  new_string->size = STRING_BUFFER_LENGTH + 1;
 
   /* Zero-terminate string */
   *++string_buffer_cursor_ = '\0';

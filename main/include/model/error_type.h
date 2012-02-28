@@ -1,0 +1,21 @@
+#ifndef ERROR_TYPE_H_JHV9902116
+#define ERROR_TYPE_H_JHV9902116
+
+enum error_type
+{
+	ERROR_NO_MATCHING_TOKEN = 1001,
+	ERROR_BAD_LITERAL_CHAR,
+	ERROR_UNTERM_CHAR,
+	ERROR_OUT_OF_MEMORY,
+	ERROR_UNTERM_STR,
+	ERROR_BAD_CHAR_ESCAPE,
+	ERROR_BAD_OCTAL_ESCAPE,
+	ERROR_EOF_COMMENT,
+	ERROR_EOF_CHAR,
+	ERROR_EOF_STR
+};
+
+int error_type_is_eof(enum error_type error);
+int error_type_requires_exit(enum error_type error);
+
+#endif /*ERROR_TYPE_H_JHV9902116*/

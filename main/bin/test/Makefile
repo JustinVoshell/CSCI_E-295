@@ -2,23 +2,26 @@
 # Justin Voshell - justin.voshell@me.com
 # CSCI E-295 Spring 2012
 
-all : UnitTests
+all : ScannerTests
 	@cp -r $(jhv-test)/data .
 
 test : all
-	@./UnitTests
+	echo $(SCANNER_OBJECTS)
+	@./ScannerTests
 
 clean :
-	@rm -f *.o UnitTests
+	@rm -f *.o ScannerTests
 	@rm -rf ./data
 
-UNIT_TESTS = ScannerTestBase.o ScannerIntegerTests.o ScannerKeywordTests.o ScannerOperatorTests.o ScannerCharacterTests.o ScannerStringTests.o ScannerCommentTests.o ScannerIdentifierTests.o ScannerWillenson2009FileTests.o
+SCANNER_TESTS = ScannerTestBase.o ScannerIntegerTests.o ScannerKeywordTests.o ScannerOperatorTests.o ScannerCharacterTests.o ScannerStringTests.o ScannerCommentTests.o ScannerIdentifierTests.o ScannerWillenson2009FileTests.o
 
-UnitTests : $(SCANNER_OBJ) $(MODEL_OBJ) $(UNIT_TESTS) gtest.a 
-Scanner%Tests.o : ScannerTestBase.h $(SCANNER_INC) $(MODEL_INC) $(TEST_HEADERS)
-ScannerTestBase.o : ScannerTestBase.h $(SCANNER_INC) $(MODEL_INC) $(TEST_HEADERS) 
+ScannerTests : CXXFLAGS += -DSTANDALONE_SCANNER
+ScannerTests : ScannerTests.o $(SCANNER_OBJECTS) $(SCANNER_TESTS) gtest.a 
 
-vpath %.h $(jhv-include) $(jhv-include)/model $(jhv-include)/scanner $(jhv-test)/include $(jhv-redist-gtest)/src
+Scanner%Tests.o : ScannerTestBase.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES)
+ScannerTestBase.o : ScannerTestBase.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES) 
+
+vpath %.h $(jhv-include) $(jhv-include)/model $(jhv-test)/include $(jhv-redist-gtest)/src
 vpath %.o $(jhv-bin)
 vpath %.cpp $(jhv-test)/src
 vpath %.cc $(jhv-redist-gtest)/src
