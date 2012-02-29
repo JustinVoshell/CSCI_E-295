@@ -7,19 +7,26 @@
 
 enum node_type
 {
-	NODE_ARRAY_DECLARATOR = 900,
+	NODE_TRANSLATION_UNIT,
+	NODE_TOP_LEVEL_DECLARATION,
 	NODE_DECLARATION,
-	NODE_DECLARATION_LIST,
-	NODE_DECLARATOR_LIST,
-	NODE_ERROR,	
-	NODE_FUNCTION_DECLARATOR,
-	NODE_IDENTIFIER,
-	NODE_LITERAL_INTEGER,
-	NODE_LITERAL_STRING,
-	NODE_PARAMETER_DECLARATION,
-	NODE_PARAMETER_LIST,
+	NODE_DECLARATION_SPECIFIERS,
+	NODE_TYPE_SPECIFIER,
+	NODE_INTEGER_TYPE_SPECIFIER,
+	NODE_SIGNED_TYPE_SPECIFIER,
+	NODE_UNSIGNED_TYPE_SPECIFIER,
+	NODE_VOID_TYPE_SPECIFIER,
+	NODE_IDECL_LIST,
+	NODE_IDECLARATOR,
+	NODE_DECLARATOR,
+	NODE_POINTER_DECLARATOR,
 	NODE_POINTER,
-	NODE_TYPE_SPECIFIER
+	NODE_DIRECT_DECLARATOR,
+	NODE_SIMPLE_DECLARATOR,
+	NODE_IDENTIFIER,
+	NODE_LITERAL_STRING,
+	NODE_LITERAL_INTEGER,
+	NODE_ERROR
 };
 
 struct node
@@ -29,53 +36,22 @@ struct node
 	
 	union node_data
 	{
-		struct array_declarator_data *array_declarator;
-		struct declaration_data      *declaration;
-		struct integer_data          *integer;
-		struct list_data             *list;
-		struct node                  *pointer_to;
-		struct string_data           *string;
-
+		int int_value; 
+		const char* cstring_value; 
 		enum error_type error_type;
-		enum integer_data_type integer_type;
-		
-		int length;
-		const char *name;
+		struct node **children; 
+		struct integer_data *integer_data;
+		struct string_data *string_data;
 	} data;
 };
-
-struct array_declarator_data
-{
-	struct node *declarator;
-	struct node *length;
-};
-
-struct declaration_data
-{
-	struct node *type_specifier;
-	struct node *declarator;
-};
-
-struct list_data
-{
-	struct node *current;
-	struct node *next;
-};
-
-struct node *node_array_declarator(struct node *declarator, struct node *constant); 
-struct node *node_declaration(struct node *type_specifier, struct node *declarator);
-struct node *node_declaration_list(struct node *declaration_list, struct node *declaration);
-struct node *node_declarator(struct node *pointer, struct node *declarator);
-struct node *node_declarator_list(struct node *declarator_list, struct node *declarator);
-struct node *node_direct_declarator(struct node* identifier);
+   
+struct node *node_basic(enum node_type node_type);
+struct node *node_int(enum node_type node_type, int value);
+struct node *node_cstring(enum node_type node_type, const char *value);
+struct node *node_unary(enum node_type node_type, struct node *child);
+struct node *node_binary(enum node_type node_type, struct node *child_left, struct node *child_right);
+struct node *node_literal_integer(enum node_type node_type, struct integer_data *integer_data);
+struct node *node_literal_string(enum node_type node_type, struct string_data *string_data);
 struct node *node_error(enum error_type error_type);
-struct node *node_function_declarator(struct node *declarator, struct node *parameter_list);
-struct node *node_identifier(const char*);
-struct node *node_literal_string(struct string_data *literal_string);
-struct node *node_literal_integer(struct integer_data *literal_integer);
-struct node *node_parameter_declaration(struct node *type_specifier, struct node *declarator);
-struct node *node_parameter_list(struct node *parameter_list, struct node *parameter_declaration);
-struct node *node_pointer(struct node* pointer);
-struct node *node_type_specifier(enum integer_data_type);
 
 #endif /*NODE_H_JHV9902116*/

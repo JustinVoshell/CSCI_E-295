@@ -41,15 +41,15 @@ void sp_print_input(const int line_number, const char* input_string, const int i
 
 void sp_print_id_(const struct node *node)
 {
-  fprintf(output_file, "%s: %s\n", resource(IDENTIFIER), node->data.name);
+  fprintf(output_file, "%s: %s\n", resource(IDENTIFIER), node->data.cstring_value);
 }
 
 void sp_print_integer_(const struct node *node)
 {
 	fprintf(output_file, "%s\t",            resource(LITERAL_NUMBER));
-  fprintf(output_file, "VALUE: %-12lu\t", node->data.integer->value);
-  fprintf(output_file, "TYPE: %-6s\t",    resource(node->data.integer->type));
-  fprintf(output_file, "%s\n",            resource(node->data.integer->overflow));
+  fprintf(output_file, "VALUE: %-12lu\t", node->data.integer_data->value);
+  fprintf(output_file, "TYPE: %-6s\t",    resource(node->data.integer_data->type));
+  fprintf(output_file, "%s\n",            resource(node->data.integer_data->overflow));
 }
 
 void sp_print_string_(const struct node *node) 
@@ -57,21 +57,21 @@ void sp_print_string_(const struct node *node)
   unsigned short idx;
 	const char *string_type_name = resource(LITERAL_STRING);
 	
-  if (node->data.string->length <= MAX_INLINE_STRLEN)
+  if (node->data.string_data->length <= MAX_INLINE_STRLEN)
   {
     fprintf(output_file, "%s\t", string_type_name);
-    for (idx = 0; idx < node->data.string->length; idx++)
+    for (idx = 0; idx < node->data.string_data->length; idx++)
     {
-      fputc(node->data.string->buffer[idx], output_file);
+      fputc(node->data.string_data->buffer[idx], output_file);
     }
     fputs("\n", output_file);
   }
   else
   {
     fprintf(output_file, "\n%s==>\n", string_type_name);
-    for (idx = 0; idx < node->data.string->length; idx++)
+    for (idx = 0; idx < node->data.string_data->length; idx++)
     {
-      fputc(node->data.string->buffer[idx], output_file);
+      fputc(node->data.string_data->buffer[idx], output_file);
     }
     fprintf(output_file, "\n<==%s\n", string_type_name);
   }

@@ -8,7 +8,9 @@ FILE *yyin;
 FILE *output_file;
 
 const char* input_filename;
+
 extern int yylineno;
+extern int yydebug;
 
 struct node *root_node;
 int yyparse();
@@ -18,6 +20,7 @@ int main(int argc, char **argv)
   int result = 0;
 
  	yyin = stdin;
+	yydebug = 1;
 	output_file = stdout;
 	input_filename = "stdin";
 	

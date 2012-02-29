@@ -183,19 +183,19 @@ while               					return scan_token(WHILE);
 
 	int scan_integer_from_char(const char value)
 	{ 
-		yylval = node_literal_integer(integer_data_from_char(value));
+		yylval = node_literal_integer(NODE_LITERAL_INTEGER, integer_data_from_char(value));
 		return LITERAL_NUMBER;
 	}
 
 	int scan_integer_from_cstring(const char* value)    
 	{ 
-		yylval = node_literal_integer(integer_data_from_cstring(value));
+		yylval = node_literal_integer(NODE_LITERAL_INTEGER, integer_data_from_cstring(value));
 		return LITERAL_NUMBER;
 	}
 
 	int scan_integer_from_octal_char(const char* value) 
 	{ 
-		yylval = node_literal_integer(integer_data_from_octal_char(value)); 
+		yylval = node_literal_integer(NODE_LITERAL_INTEGER, integer_data_from_octal_char(value)); 
 		return LITERAL_NUMBER;
 	}
 
@@ -208,7 +208,7 @@ while               					return scan_token(WHILE);
 	int scan_end_string()   
 	{ 
 		BEGIN(0);
-		yylval = node_literal_string(string_data_from_buffer()); 
+		yylval = node_literal_string(NODE_LITERAL_STRING, string_data_from_buffer()); 
 		return LITERAL_STRING;
 	}
 
@@ -217,7 +217,7 @@ while               					return scan_token(WHILE);
 		char* name = (char *) malloc(sizeof(char) * (length + 1));
 		if (name) strcpy(name, string);
 	
-		yylval = node_identifier(name);
+		yylval = node_cstring(NODE_IDENTIFIER, name);
 		return IDENTIFIER;
 	}
 
