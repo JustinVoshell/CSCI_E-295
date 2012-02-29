@@ -102,23 +102,23 @@ type_specifier                         : integer_type_specifier                 
                                        | void_type_specifier                                                           { $$ = node_unary(NODE_TYPE_SPECIFIER, $1);          }
                                        ;
 
-integer_type_specifier								 : signed_type_specifier                                                         { $$ = node_unary(NODE_SIGNED_TYPE_SPECIFIER, $1);   }
-																			 | unsigned_type_specifier                                                       { $$ = node_unary(NODE_UNSIGNED_TYPE_SPECIFIER, $1); }
-																			 ;
+integer_type_specifier                 : signed_type_specifier                                                         { $$ = node_unary(NODE_SIGNED_TYPE_SPECIFIER, $1);   }
+                                       | unsigned_type_specifier                                                       { $$ = node_unary(NODE_UNSIGNED_TYPE_SPECIFIER, $1); }
+                                       ;
 
 signed_type_specifier                  : CHAR                                                                          { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
-	                                     | SIGNED CHAR                                                                   { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
-	                                     | SHORT                                                                         { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | SIGNED CHAR                                                                   { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
+                                       | SHORT                                                                         { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
                                        | SHORT INT                                                                     { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-	                                     | SIGNED SHORT                                                                  { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-                                     	 | SIGNED SHORT INT                                                              { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-	                                     | INT                                                                           { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
-	                                     | SIGNED                                                                        { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
-	                                     | SIGNED INT                                                                    { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
-	                                     | LONG 						                                                             { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
-	                                     | LONG INT                                                                      { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
-	                                     | SIGNED LONG                                                                   { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
-	                                     | SIGNED LONG INT                                                               { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | SIGNED SHORT                                                                  { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | SIGNED SHORT INT                                                              { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | INT                                                                           { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
+                                       | SIGNED                                                                        { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
+                                       | SIGNED INT                                                                    { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
+                                       | LONG                                                                          { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | LONG INT                                                                      { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | SIGNED LONG                                                                   { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | SIGNED LONG INT                                                               { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
                                        ;
 
 unsigned_type_specifier                : UNSIGNED CHAR                                                                 { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_CHAR); }
