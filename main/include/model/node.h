@@ -7,6 +7,7 @@
 
 enum node_type
 {
+	NODE_ROOT,
 	NODE_TRANSLATION_UNIT,
 	NODE_TOP_LEVEL_DECLARATION,
 	NODE_DECLARATION,
@@ -23,7 +24,7 @@ enum node_type
 	NODE_POINTER,
 	NODE_DIRECT_DECLARATOR,
 	NODE_SIMPLE_DECLARATOR,
-	NODE_IDENTIFIER,
+	NODE_IDENTIFIER, 
 	NODE_LITERAL_STRING,
 	NODE_LITERAL_INTEGER,
 	NODE_ERROR
@@ -39,6 +40,7 @@ struct node
 		int int_value; 
 		const char* cstring_value; 
 		enum error_type error_type;
+		struct node *child;
 		struct node **children; 
 		struct integer_data *integer_data;
 		struct string_data *string_data;

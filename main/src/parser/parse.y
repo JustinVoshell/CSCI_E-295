@@ -81,7 +81,7 @@
 
 %%
 
-root                                   : translation_unit                                                              { root_node = $1; }
+root                                   : translation_unit                                                              { root_node = node_unary(NODE_ROOT, $1);             }
                                        ;
 
 translation_unit                       : top_level_declaration                                                         { $$ = node_binary(NODE_TRANSLATION_UNIT,  0, $1);   }
@@ -102,39 +102,39 @@ type_specifier                         : integer_type_specifier                 
                                        | void_type_specifier                                                           { $$ = node_unary(NODE_TYPE_SPECIFIER, $1);          }
                                        ;
 
-integer_type_specifier                 : signed_type_specifier                                                         { $$ = node_unary(NODE_SIGNED_TYPE_SPECIFIER, $1);   }
-                                       | unsigned_type_specifier                                                       { $$ = node_unary(NODE_UNSIGNED_TYPE_SPECIFIER, $1); }
+integer_type_specifier                 : signed_type_specifier                                                         { $$ = node_unary(NODE_INTEGER_TYPE_SPECIFIER, $1);  }
+                                       | unsigned_type_specifier                                                       { $$ = node_unary(NODE_INTEGER_TYPE_SPECIFIER, $1);  }
                                        ;
 
-signed_type_specifier                  : CHAR                                                                          { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
-                                       | SIGNED CHAR                                                                   { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
-                                       | SHORT                                                                         { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-                                       | SHORT INT                                                                     { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-                                       | SIGNED SHORT                                                                  { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-                                       | SIGNED SHORT INT                                                              { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
-                                       | INT                                                                           { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
-                                       | SIGNED                                                                        { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
-                                       | SIGNED INT                                                                    { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
-                                       | LONG                                                                          { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
-                                       | LONG INT                                                                      { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
-                                       | SIGNED LONG                                                                   { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
-                                       | SIGNED LONG INT                                                               { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+signed_type_specifier                  : CHAR                                                                          { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
+                                       | SIGNED CHAR                                                                   { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
+                                       | SHORT                                                                         { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | SHORT INT                                                                     { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | SIGNED SHORT                                                                  { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | SIGNED SHORT INT                                                              { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_SHORT);  }
+                                       | INT                                                                           { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
+                                       | SIGNED                                                                        { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
+                                       | SIGNED INT                                                                    { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_INT);    }
+                                       | LONG                                                                          { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | LONG INT                                                                      { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | SIGNED LONG                                                                   { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
+                                       | SIGNED LONG INT                                                               { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
                                        ;
 
-unsigned_type_specifier                : UNSIGNED CHAR                                                                 { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_CHAR); }
-	                                     | UNSIGNED SHORT                                                                { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_SHORT);}
-	                                     | UNSIGNED SHORT INT                                                            { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_SHORT);}
-	                                     | UNSIGNED                                                                      { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_INT);  }
-	                                     | UNSIGNED INT                                                                  { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_INT);  }
-	                                     | UNSIGNED LONG                                                                 { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_LONG); }
-	                                     | UNSIGNED LONG INT                                                             { $$ = node_int(NODE_INTEGER_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_LONG); }
+unsigned_type_specifier                : UNSIGNED CHAR                                                                 { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_CHAR); }
+	                                     | UNSIGNED SHORT                                                                { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_SHORT);}
+	                                     | UNSIGNED SHORT INT                                                            { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_SHORT);}
+	                                     | UNSIGNED                                                                      { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_INT);  }
+	                                     | UNSIGNED INT                                                                  { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_INT);  }
+	                                     | UNSIGNED LONG                                                                 { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_LONG); }
+	                                     | UNSIGNED LONG INT                                                             { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_LONG); }
                                        ;                                                                               
 
 void_type_specifier                    : VOID                                                                          { $$ = node_basic(NODE_VOID_TYPE_SPECIFIER);  }
                                        ;
 
 initialized_declarator_list            : initialized_declarator                                                        { $$ = node_binary(NODE_IDECL_LIST, 0,  $1);  }
-                                       | initialized_declarator_list SEQUENTIAL_EVAL initialized_declarator            { $$ = node_binary(NODE_IDECL_LIST, $1, $2);  }
+                                       | initialized_declarator_list SEQUENTIAL_EVAL initialized_declarator            { $$ = node_binary(NODE_IDECL_LIST, $1, $3);  }
                                        ;
 
 initialized_declarator                 : declarator                                                                    { $$ = node_unary(NODE_IDECLARATOR, $1);      }
@@ -148,11 +148,11 @@ pointer_declarator                     : pointer direct_declarator              
                                        ;	
 
 pointer                                : ASTERISK                                                                      { $$ = node_unary(NODE_POINTER, 0 ); }
-	                                     | ASTERISK pointer                                                              { $$ = node_unary(NODE_POINTER, $1); }
+	                                     | ASTERISK pointer                                                              { $$ = node_unary(NODE_POINTER, $2); }
                                        ;	
 
 direct_declarator                      : simple_declarator                                                             { $$ = node_unary(NODE_DIRECT_DECLARATOR, $1); }
-	                                     | LEFT_PAREN declarator RIGHT_PAREN                                             { $$ = node_unary(NODE_DIRECT_DECLARATOR, $1); }
+	                                     | LEFT_PAREN declarator RIGHT_PAREN                                             { $$ = $2 }
                                      /*| function_declarator */
                                      /*| array_declarator    */
                                        ;

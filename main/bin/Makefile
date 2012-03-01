@@ -40,7 +40,7 @@ vpath %.y $(jhv-src)/parser
 
 # COMPILE.c
 CC = gcc
-CFLAGS += -g -Wall -Wextra -pedantic
+CFLAGS += -g -Wall -Wextra -pedantic -g
 CPPFLAGS += -I $(jhv-include) -I $(jhv-bin)
 
 # LINK.o
@@ -65,11 +65,11 @@ test: scanner
 scanner: scanner_printer.o $(SCANNER_OBJECTS)
 scanner: LDFLAGS += -DSTANDALONE_SCANNER
 
-scanner.o: CPPFLAGS += -DSTANDALONE_SCANNER
 scanner.o: scanner_printer.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES)
+scanner.o: CPPFLAGS += -DSTANDALONE_SCANNER
 
-scanner_printer.o: CPPFLAGS += -DSTANDALONE_SCANNER
 scanner_printer.o: scanner_printer.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES)
+scanner_printer.o: CPPFLAGS += -DSTANDALONE_SCANNER
 
 parser: parser_printer.o $(PARSER_OBJECTS)
 parser.o: parser_printer.h $(PARSER_OBJECTS) $(MODEL_INCLUDES) parse.h

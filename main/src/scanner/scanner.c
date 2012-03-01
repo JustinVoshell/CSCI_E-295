@@ -85,7 +85,7 @@ void open_(int argc, char** argv)
 {
   if (argc < 2 || !strcmp("-", argv[1])) 
   {
-		input_filename = "stdin";
+    input_filename = "stdin";
     yyin = stdin;
   }
   else

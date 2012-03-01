@@ -33,7 +33,7 @@ struct node *node_cstring(enum node_type node_type, const char* cstring)
 struct node *node_unary(enum node_type node_type, struct node *child)
 {
 	struct node *new_node = node_basic(node_type);
-	new_node->data.children = &child;
+	new_node->data.child = child;
 	return new_node;
 }
 
