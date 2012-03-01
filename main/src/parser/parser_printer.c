@@ -144,6 +144,25 @@ void pp_print_identifier_(struct node *identifier)
 	fputs(identifier->data.cstring_value, output_file);
 } 
 
+void pp_print_literal_integer_(struct node *literal_integer)
+{
+  fprintf(output_file, "%lu", literal_integer->data.integer_data->value);
+}
+
+void pp_print_constant_expression_(struct node *constant_expression)
+{
+  pp_print(constant_expression->data.child);
+}
+
+void pp_print_array_declarator_(struct node* array_declarator)
+{
+  fputs("(", output_file);
+  pp_print(array_declarator->data.children[0]);
+  fputs("[", output_file);
+  if (array_declarator->data.children[1]) pp_print(array_declarator->data.children[1]);
+  fputs("])", output_file);
+}
+
 void pp_print(struct node *node)                                                                     
 {                                                                                                    
 	switch(node->node_type)                                                                            
@@ -164,7 +183,10 @@ void pp_print(struct node *node)
 		case NODE_POINTER_DECLARATOR     : { pp_print_pointer_declarator_(node);     break; }
 		case NODE_DIRECT_DECLARATOR      : { pp_print_direct_declarator_(node);      break; }
 		case NODE_SIMPLE_DECLARATOR      : { pp_print_simple_declarator_(node);      break; } 
-		case NODE_IDENTIFIER             : { pp_print_identifier_(node);             break; }  
+		case NODE_IDENTIFIER             : { pp_print_identifier_(node);             break; }
+    case NODE_LITERAL_INTEGER        : { pp_print_literal_integer_(node);        break; }
+    case NODE_ARRAY_DECLARATOR       : { pp_print_array_declarator_(node);       break; }
+    case NODE_CONSTANT_EXPRESSION    : { pp_print_constant_expression_(node);    break; }  
 		default : break;
 	}
 }

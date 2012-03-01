@@ -154,10 +154,17 @@ pointer                                : ASTERISK                               
 direct_declarator                      : simple_declarator                                                             { $$ = node_unary(NODE_DIRECT_DECLARATOR, $1); }
 	                                     | LEFT_PAREN declarator RIGHT_PAREN                                             { $$ = $2 }
                                      /*| function_declarator */
-                                     /*| array_declarator    */
+                                       | array_declarator                                                              { $$ = node_unary(NODE_DIRECT_DECLARATOR, $1); }
                                        ;
 
 simple_declarator                      : IDENTIFIER                                                                    { $$ = node_unary(NODE_SIMPLE_DECLARATOR, $1); }
                                        ;
 
+array_declarator                       : direct_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET              { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1, $3); }
+                                       | direct_declarator LEFT_BRACKET RIGHT_BRACKET                                  { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1,  0); }
+                                       ;
+
+constant_expression                    : LITERAL_NUMBER                                                                { $$ = node_unary(NODE_CONSTANT_EXPRESSION, $1);   }
+                                       ;
+                                       
 %%
