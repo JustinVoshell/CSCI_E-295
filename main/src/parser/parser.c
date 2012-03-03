@@ -2,6 +2,9 @@
 #include <string.h>
 
 #include "model/node.h"
+#include "model/resource.h"
+
+#include "parse.h"
 #include "parser/parser_printer.h"
 
 FILE *yyin;
@@ -10,22 +13,25 @@ FILE *output_file;
 const char* input_filename;
 const char* output_filename;
 
-extern int yylineno;
+extern YYLTYPE yylloc;
 extern int yydebug;
 
 struct node *root_node;
 int yyparse();
 
+int errorCount = 0;
 void open_(int argc, char** argv);
 void close_();
 
 int main(int argc, char **argv) 
 {
   int result;
-  open_(argc, argv);
 
+  open_(argc, argv);
+  resource_init();
+  
 	result = yyparse();
-	if (!result) 
+	if (!result && errorCount == 0) 
   {
     pp_print(root_node);
     fputs("\n\n", output_file);
@@ -37,7 +43,13 @@ int main(int argc, char **argv)
 
 void yyerror(const char *error_message)
 {
-	fprintf(stderr, "%s:%d: error: %s", input_filename, yylineno, error_message);
+	fprintf(stderr, "%s:%d.%d-%d.%d: error: %s\n", 
+    input_filename, 
+    yylloc.first_line, yylloc.first_column,
+    yylloc.last_line, yylloc.last_column,
+    error_message);
+  
+  errorCount++;
 }
 
 void open_(int argc, char** argv)

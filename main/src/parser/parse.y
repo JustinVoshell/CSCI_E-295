@@ -1,17 +1,20 @@
 %{
 	#include <stdio.h>
+  #include "model/resource.h"
 	#include "model/node.h"
 	#define YYSTYPE struct node*
 
+	int yylex();
 	void yyerror(const char*);	
 	extern struct node *root_node; 
 
-	int yylex();
+  int is_function_declarator(struct node* declarator);
 %}
 
 %debug
 %verbose
 %error_verbose
+%locations
 
 %token IDENTIFIER
 %token LITERAL_STRING      
@@ -84,27 +87,73 @@
 root                                   : translation_unit                                                              { root_node = node_unary(NODE_ROOT, $1);             }
                                        ;
 
-translation_unit                       : top_level_declaration                                                         { $$ = node_binary(NODE_TRANSLATION_UNIT,  0, $1);   }
-                                       | translation_unit top_level_declaration                                        { $$ = node_binary(NODE_TRANSLATION_UNIT, $1, $2);   }
+abstract_declarator                    : pointer                                                                       { $$ = node_binary(NODE_ABSTRACT_DECLARATOR, $1,  0); }
+                                       | direct_abstract_declarator                                                    { $$ = node_binary(NODE_ABSTRACT_DECLARATOR,  0, $1); }        
+                                       | pointer direct_abstract_declarator                                            { $$ = node_binary(NODE_ABSTRACT_DECLARATOR, $1, $2); }
                                        ;
 
-top_level_declaration                  : declaration                                                                   { $$ = node_unary(NODE_TOP_LEVEL_DECLARATION, $1);   }
-                                     /*| function_definition */
+array_declarator                       : direct_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET              { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1, $3); }
+                                       | direct_declarator LEFT_BRACKET RIGHT_BRACKET                                  { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1,  0); }
                                        ;
 
-declaration                            : declaration_specifiers initialized_declarator_list SEMICOLON                  { $$ = node_binary(NODE_DECLARATION, $1, $2);        }
+constant_expression                    : LITERAL_NUMBER                                                                { $$ = node_unary(NODE_CONSTANT_EXPRESSION, $1);   }
+                                       ;
+             
+declaration                            : type_specifier declarator_list SEMICOLON                                      { $$ = node_binary(NODE_DECLARATION, $1, $2);        }
+                                       | error SEMICOLON
                                        ;
 
-declaration_specifiers                 : type_specifier                                                                { $$ = node_unary(NODE_DECLARATION_SPECIFIERS, $1);  }
-                                       ;
-	
-type_specifier                         : integer_type_specifier                                                        { $$ = node_unary(NODE_TYPE_SPECIFIER, $1);          }
-                                       | void_type_specifier                                                           { $$ = node_unary(NODE_TYPE_SPECIFIER, $1);          }
+declarator                             : pointer_declarator                                                            { $$ = $1 }
+	                                     | direct_declarator                                                             { $$ = $1 }
                                        ;
 
-integer_type_specifier                 : signed_type_specifier                                                         { $$ = node_unary(NODE_INTEGER_TYPE_SPECIFIER, $1);  }
-                                       | unsigned_type_specifier                                                       { $$ = node_unary(NODE_INTEGER_TYPE_SPECIFIER, $1);  }
+declarator_list                        : declarator                                                                    { $$ = node_binary(NODE_DECLARATOR_LIST,  0, $1);  }
+                                       | declarator_list SEQUENTIAL_EVAL declarator                                    { $$ = node_binary(NODE_DECLARATOR_LIST, $1, $3);  }
                                        ;
+
+direct_abstract_declarator             : LEFT_PAREN abstract_declarator RIGHT_PAREN                                    { $$ = $2 }
+                                       | LEFT_BRACKET constant_expression RIGHT_BRACKET                                { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR,  0, $2); }
+                                       | direct_abstract_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET     { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR, $1, $3); }
+                                       | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET                         { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR, $1,  0); }
+                                       ;                                                                             
+
+direct_declarator                      : simple_declarator                                                             { $$ = $1 }
+	                                     | LEFT_PAREN declarator RIGHT_PAREN                                             { $$ = $2 }
+                                       | function_declarator                                                           { $$ = $1 }
+                                       | array_declarator                                                              { $$ = $1 }
+                                       ;
+
+function_declarator                    : direct_declarator LEFT_PAREN parameter_type_list RIGHT_PAREN                  { $$ = node_binary(NODE_FUNCTION_DECLARATOR, $1, $3); }
+                                       ;
+
+integer_type_specifier                 : signed_type_specifier                                                         { $$ = $1 }
+                                       | unsigned_type_specifier                                                       { $$ = $1 }
+                                       ;
+
+parameter_declaration                  : type_specifier declarator                                                     { if (node_is_function_declarator($2))
+                                                                                                                         { 
+                                                                                                                           yyerror(resource(ERROR_FUNCTION_AS_FUNCTION_PARAMETER));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         else $$ = node_binary(NODE_PARAMETER_DECLARATION, $1, $2);
+                                                                                                                       }
+                                       | type_specifier                                                                { $$ = node_binary(NODE_PARAMETER_DECLARATION, $1,  0); }
+                                       | type_specifier abstract_declarator                                            { $$ = node_binary(NODE_PARAMETER_DECLARATION, $1, $2); }
+                                       ;
+
+parameter_list                         : parameter_declaration                                                         { $$ = node_binary(NODE_PARAMETER_LIST,  0, $1); }
+                                       | parameter_list SEQUENTIAL_EVAL parameter_declaration                          { $$ = node_binary(NODE_PARAMETER_LIST, $1, $3); }
+                                       ;
+
+parameter_type_list                    : parameter_list                                                                { $$ = node_unary(NODE_PARAMETER_TYPE_LIST, $1); }
+                                       ;
+
+pointer                                : ASTERISK                                                                      { $$ = node_unary(NODE_POINTER, 0 ); }
+	                                     | ASTERISK pointer                                                              { $$ = node_unary(NODE_POINTER, $2); }
+                                       ;	
+
+pointer_declarator                     : pointer direct_declarator                                                     { $$ = node_pointer_declarator($1, $2); }
+                                       ;	
 
 signed_type_specifier                  : CHAR                                                                          { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
                                        | SIGNED CHAR                                                                   { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_CHAR);   }
@@ -121,6 +170,22 @@ signed_type_specifier                  : CHAR                                   
                                        | SIGNED LONG INT                                                               { $$ = node_int(NODE_SIGNED_TYPE_SPECIFIER, INTEGER_DATA_SIGNED_LONG);   }
                                        ;
 
+simple_declarator                      : IDENTIFIER                                                                    { $$ = node_unary(NODE_SIMPLE_DECLARATOR, $1); }
+                                       ;
+
+top_level_declaration                  : declaration                                                                   { $$ = node_unary(NODE_TOP_LEVEL_DECLARATION, $1);   }
+                                     /*| function_definition */
+                                       ;
+
+translation_unit                       : top_level_declaration                                                         { $$ = node_binary(NODE_TRANSLATION_UNIT,  0, $1);   }
+                                       | translation_unit top_level_declaration                                        { $$ = node_binary(NODE_TRANSLATION_UNIT, $1, $2);   }
+                                       | error
+                                       ;
+
+type_specifier                         : integer_type_specifier                                                        { $$ = $1 }
+                                       | void_type_specifier                                                           { $$ = $1 }
+                                       ;
+
 unsigned_type_specifier                : UNSIGNED CHAR                                                                 { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_CHAR); }
 	                                     | UNSIGNED SHORT                                                                { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_SHORT);}
 	                                     | UNSIGNED SHORT INT                                                            { $$ = node_int(NODE_UNSIGNED_TYPE_SPECIFIER, INTEGER_DATA_UNSIGNED_SHORT);}
@@ -133,38 +198,4 @@ unsigned_type_specifier                : UNSIGNED CHAR                          
 void_type_specifier                    : VOID                                                                          { $$ = node_basic(NODE_VOID_TYPE_SPECIFIER);  }
                                        ;
 
-initialized_declarator_list            : initialized_declarator                                                        { $$ = node_binary(NODE_IDECL_LIST, 0,  $1);  }
-                                       | initialized_declarator_list SEQUENTIAL_EVAL initialized_declarator            { $$ = node_binary(NODE_IDECL_LIST, $1, $3);  }
-                                       ;
-
-initialized_declarator                 : declarator                                                                    { $$ = node_unary(NODE_IDECLARATOR, $1);      }
-                                       ;
-
-declarator                             : pointer_declarator                                                            { $$ = node_unary(NODE_DECLARATOR, $1);       }
-	                                     | direct_declarator                                                             { $$ = node_unary(NODE_DECLARATOR, $1);       }
-                                       ;
-
-pointer_declarator                     : pointer direct_declarator                                                     { $$ = node_binary(NODE_POINTER_DECLARATOR, $1, $2); }
-                                       ;	
-
-pointer                                : ASTERISK                                                                      { $$ = node_unary(NODE_POINTER, 0 ); }
-	                                     | ASTERISK pointer                                                              { $$ = node_unary(NODE_POINTER, $2); }
-                                       ;	
-
-direct_declarator                      : simple_declarator                                                             { $$ = node_unary(NODE_DIRECT_DECLARATOR, $1); }
-	                                     | LEFT_PAREN declarator RIGHT_PAREN                                             { $$ = $2 }
-                                     /*| function_declarator */
-                                       | array_declarator                                                              { $$ = node_unary(NODE_DIRECT_DECLARATOR, $1); }
-                                       ;
-
-simple_declarator                      : IDENTIFIER                                                                    { $$ = node_unary(NODE_SIMPLE_DECLARATOR, $1); }
-                                       ;
-
-array_declarator                       : direct_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET              { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1, $3); }
-                                       | direct_declarator LEFT_BRACKET RIGHT_BRACKET                                  { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1,  0); }
-                                       ;
-
-constant_expression                    : LITERAL_NUMBER                                                                { $$ = node_unary(NODE_CONSTANT_EXPRESSION, $1);   }
-                                       ;
-                                       
 %%

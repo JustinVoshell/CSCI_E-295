@@ -11,14 +11,10 @@ enum node_type
 	NODE_TRANSLATION_UNIT,
 	NODE_TOP_LEVEL_DECLARATION,
 	NODE_DECLARATION,
-	NODE_DECLARATION_SPECIFIERS,
-	NODE_TYPE_SPECIFIER,
-	NODE_INTEGER_TYPE_SPECIFIER,
 	NODE_SIGNED_TYPE_SPECIFIER,
 	NODE_UNSIGNED_TYPE_SPECIFIER,
 	NODE_VOID_TYPE_SPECIFIER,
-	NODE_IDECL_LIST,
-	NODE_IDECLARATOR,
+	NODE_DECLARATOR_LIST,
 	NODE_DECLARATOR,
 	NODE_POINTER_DECLARATOR,
 	NODE_POINTER,
@@ -29,7 +25,13 @@ enum node_type
 	NODE_LITERAL_INTEGER,
 	NODE_ERROR,
   NODE_ARRAY_DECLARATOR,
-  NODE_CONSTANT_EXPRESSION
+  NODE_CONSTANT_EXPRESSION,
+  NODE_FUNCTION_DECLARATOR,
+  NODE_PARAMETER_TYPE_LIST,
+  NODE_PARAMETER_LIST,
+  NODE_PARAMETER_DECLARATION,
+  NODE_ABSTRACT_DECLARATOR,
+  NODE_DIRECT_ABSTRACT_DECLARATOR
 };
 
 struct node
@@ -57,5 +59,11 @@ struct node *node_binary(enum node_type node_type, struct node *child_left, stru
 struct node *node_literal_integer(enum node_type node_type, struct integer_data *integer_data);
 struct node *node_literal_string(enum node_type node_type, struct string_data *string_data);
 struct node *node_error(enum error_type error_type);
+
+
+int node_is_function_declarator(struct node *declarator);
+struct node *node_pointer_declarator(struct node *pointer, struct node *declarator);
+struct node *node_consolidate_pointers(struct node *pointer, struct node *pointer_declarator);
+struct node *node_unary_list_head(struct node *unary_node);
 
 #endif /*NODE_H_JHV9902116*/

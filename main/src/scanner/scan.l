@@ -6,9 +6,20 @@
 
 	#include "model/node.h" 
   #define YYSTYPE struct node*
-
+  
   #ifdef STANDALONE_SCANNER
+  
   extern YYSTYPE yylval;
+  #define NEWLINE  
+  
+  #else
+  
+  int yycolumn = 1;
+  #define NEWLINE yycolumn = 1;
+  #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
+                         yylloc.first_column = yycolumn; \
+                         yylloc.last_column = yycolumn + yyleng - 1; \
+                         yycolumn += yyleng;
   #endif
 
   #include "model/tokens.h"
@@ -41,7 +52,7 @@
 %x S
 %x BAD_CHAR
 
-ws                  					[ \t\v\f\n]+
+ws                  					[ \t\v\f]+
 id                  					[[:alpha:]_][[:alnum:]_]*
 num                 					0|[1-9][[:digit:]]*
 comment_begin									\/\*
@@ -59,7 +70,7 @@ string_char                    [[:print:]]{-}[\\\n\"]+
 {comment_begin}               BEGIN(X);
 <X>{comment_body}             ;                 
 <X>{comment_bodyStars}      	;                    
-<X>\n                  				;                   
+<X>\n                  				NEWLINE;                   
 <X><<EOF>>             				return scan_error(ERROR_EOF_COMMENT);
 <X>{comment_end}             	BEGIN(0);            
 
@@ -84,12 +95,12 @@ string_char                    [[:print:]]{-}[\\\n\"]+
 
 \'                						BEGIN(BAD_CHAR);
 <BAD_CHAR>[^\n\']+           	return scan_error(ERROR_BAD_LITERAL_CHAR);
-<BAD_CHAR>\n                 	return scan_error(ERROR_UNTERM_CHAR);
+<BAD_CHAR>\n                 	{ NEWLINE; return scan_error(ERROR_UNTERM_CHAR); }
 <BAD_CHAR><<EOF>>            	return scan_error(ERROR_EOF_CHAR);
 <BAD_CHAR>"'"                	BEGIN(0);
 
 \"                						if (scan_begin_string()) return ERROR_OUT_OF_MEMORY;
-<S>\\\n              				  ; /* continuation */                
+<S>\\\n              				  NEWLINE; /* continuation */                
 <S>\\                				  return scan_error(ERROR_BAD_CHAR_ESCAPE);
 <S>\\a               				  if (string_data_add_char('\a')) return scan_error(ERROR_OUT_OF_MEMORY);
 <S>\\b               				  if (string_data_add_char('\b')) return scan_error(ERROR_OUT_OF_MEMORY);
@@ -104,7 +115,7 @@ string_char                    [[:print:]]{-}[\\\n\"]+
 <S>\\\\              				  if (string_data_add_char('\\')) return scan_error(ERROR_OUT_OF_MEMORY);                                                              
 <S>{octal_literal}      		  if (string_data_add_octal_char(yytext)) return scan_error(ERROR_OUT_OF_MEMORY);
 <S>{bad_octal_literal} 				return scan_error(ERROR_BAD_OCTAL_ESCAPE);
-<S>\n                  				return scan_error(ERROR_UNTERM_STR);
+<S>\n                  				{ NEWLINE; return scan_error(ERROR_UNTERM_STR); }
 <S><<EOF>>             				return scan_error(ERROR_EOF_STR);
 <S>{string_char}  						if (string_data_add_cstring(yytext, yyleng)) return scan_error(ERROR_OUT_OF_MEMORY);
 <S>\"													return scan_end_string();
@@ -172,6 +183,7 @@ while               					return scan_token(WHILE);
 ";"                 					return scan_token(SEMICOLON);   
 ","                 					return scan_token(SEQUENTIAL_EVAL);  
 
+\n                            NEWLINE;
 .                   					return scan_error(ERROR_NO_MATCHING_TOKEN);
 
 %%

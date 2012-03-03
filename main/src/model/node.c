@@ -66,3 +66,34 @@ struct node *node_error(enum error_type error_type)
 	new_node->data.error_type = error_type;
 	return new_node;
 }
+
+int node_is_function_declarator(struct node *declarator)
+{
+  if (!declarator) return 0;
+  
+  if (declarator->node_type == NODE_POINTER_DECLARATOR) declarator = declarator->data.children[1];
+    return (declarator && declarator->node_type == NODE_FUNCTION_DECLARATOR) ? 1: 0;
+}
+
+struct node *node_pointer_declarator(struct node *pointer, struct node *declarator)
+{
+  if (declarator->node_type == NODE_POINTER_DECLARATOR)
+    return node_consolidate_pointers(pointer, declarator);
+    
+  return node_binary(NODE_POINTER_DECLARATOR, pointer, declarator);
+}
+
+struct node *node_consolidate_pointers(struct node *pointer, struct node *pointer_declarator)
+{
+  struct node* pointer_head = node_unary_list_head(pointer);
+  pointer_head->data.child = pointer_declarator->data.children[0];
+  pointer_declarator->data.children[0] = pointer;
+  return pointer_declarator;
+}
+
+struct node *node_unary_list_head(struct node *unary_node)
+{
+  struct node *head = unary_node;
+  while (head->data.child) head = head->data.child;
+  return head;
+}

@@ -12,7 +12,8 @@ enum error_type
 	ERROR_BAD_OCTAL_ESCAPE,
 	ERROR_EOF_COMMENT,
 	ERROR_EOF_CHAR,
-	ERROR_EOF_STR
+	ERROR_EOF_STR,
+  ERROR_FUNCTION_AS_FUNCTION_PARAMETER
 };
 
 int error_type_is_eof(enum error_type error);

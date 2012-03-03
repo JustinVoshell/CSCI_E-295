@@ -45,26 +45,11 @@ void pp_print_declaration_(struct node *declaration)
   fputs(";\n", output_file);
 }
 	           
-void pp_print_declaration_specifiers_(struct node *declaration_specifiers)
-{
-	pp_print(declaration_specifiers->data.child);
-}
-
-void pp_print_type_specifier_(struct node *type_specifier)
-{
-	pp_print(type_specifier->data.child);
-}
-
 void pp_print_void_type_specifier_(void)
 {
 	fputs("void", output_file);
 }
        
-void pp_print_integer_type_specifier_(struct node* integer_type_specifier)
-{
-	pp_print(integer_type_specifier->data.child);
-}
-
 void pp_print_signed_type_specifier_(struct node* signed_type_specifier)
 {
 	switch(signed_type_specifier->data.int_value)
@@ -89,54 +74,44 @@ void pp_print_unsigned_type_specifier_(struct node* unsigned_type_specifier)
 	}
 }
    	        	   
-void pp_print_ideclarator_list_(struct node *ideclarator_list)
+void pp_print_declarator_list_(struct node *ideclarator_list)
 {
 	if (ideclarator_list->data.children[0])
   {
     pp_print(ideclarator_list->data.children[0]);
     fputs(", ", output_file);
   }
+  fputs("(", output_file);
   pp_print(ideclarator_list->data.children[1]);    
-}
-	      
-void pp_print_ideclarator_(struct node *ideclarator)
-{
-	pp_print(ideclarator->data.child);
-}
-	           
-void pp_print_declarator_(struct node *declarator)
-{
-	pp_print(declarator->data.child);
+  fputs(")", output_file);
 }
 
-void pp_print_pointer_to_declarator_(struct node *pointer, struct node *direct_declarator)
+void pp_print_pointer_to_(struct node *pointer, struct node *node)
 {
-	fputs("(*", output_file);
+	fputs("*", output_file);
 	
 	if (pointer->data.child)
-		pp_print_pointer_to_declarator_(pointer->data.child, direct_declarator);
-	
-	else
-		pp_print(direct_declarator);
-		
-	fputs(")", output_file);
+  {
+    fputs("(", output_file);
+		pp_print_pointer_to_(pointer->data.child, node);
+    fputs(")", output_file);
+	}
+	else if (node)
+  {
+    fputs("(", output_file);
+    pp_print(node);
+    fputs(")", output_file);
+  }
 }	    
 	            
 void pp_print_pointer_declarator_(struct node *pointer_declarator)
 {
-	pp_print_pointer_to_declarator_(pointer_declarator->data.children[0], pointer_declarator->data.children[1]);
+	pp_print_pointer_to_(pointer_declarator->data.children[0], pointer_declarator->data.children[1]);
 }
-	               
-void pp_print_direct_declarator_(struct node *direct_declarator)
-{
-	pp_print(direct_declarator->data.child);
-}
-	     
+    
 void pp_print_simple_declarator_(struct node *simple_declarator)
 {
-	fputs("(", output_file);
   pp_print(simple_declarator->data.child);
-  fputs(")", output_file);
 }
           
 void pp_print_identifier_(struct node *identifier)
@@ -163,30 +138,90 @@ void pp_print_array_declarator_(struct node* array_declarator)
   fputs("])", output_file);
 }
 
-void pp_print(struct node *node)                                                                     
-{                                                                                                    
+void pp_print_function_declarator_(struct node* function_declarator)
+{
+  pp_print(function_declarator->data.children[0]);
+  fputs("(", output_file);
+  pp_print(function_declarator->data.children[1]);
+  fputs(")", output_file);
+}
+
+void pp_print_parameter_type_list_(struct node* parameter_type_list)
+{
+  pp_print(parameter_type_list->data.child);
+}
+
+void pp_print_parameter_list_(struct node* parameter_list)
+{
+  if (parameter_list->data.children[0])
+  {
+    pp_print(parameter_list->data.children[0]);
+    fputs(", ", output_file);
+  }
+  pp_print(parameter_list->data.children[1]);
+}
+
+void pp_print_parameter_declaration_(struct node* parameter_declaration)
+{
+  pp_print(parameter_declaration->data.children[0]);
+  if (parameter_declaration->data.children[1])
+  {
+    fputs("(", output_file);
+    pp_print(parameter_declaration->data.children[1]);
+    fputs(")", output_file);
+  }
+}
+
+void pp_print_abstract_declarator_(struct node* abstract_declarator)
+{
+  if (abstract_declarator->data.children[0]) pp_print_pointer_to_(abstract_declarator->data.children[0], abstract_declarator->data.children[1]);
+  else if (abstract_declarator->data.children[1]) pp_print(abstract_declarator->data.children[1]);
+  
+}
+
+void pp_print_direct_abstract_declarator_(struct node* direct_abstract_declarator)
+{
+  if (direct_abstract_declarator->data.children[0]) pp_print(direct_abstract_declarator->data.children[0]);
+  fputs("[", output_file);
+  pp_print(direct_abstract_declarator->data.children[1]);
+  fputs("]", output_file);
+}
+
+int pp_print(struct node *node)                                                                     
+{ 
+  if (!node)
+  {
+    fprintf(stderr, "[ERROR]: Attempt to print null parse node. Terminating output.\n");
+    fputs("/*ERROR: NULL encountered.  Output terminated.*/", output_file);
+    return 1;
+  }
+  
 	switch(node->node_type)                                                                            
 	{                   
-    case NODE_ROOT                   : { pp_print_root_node_(node);              break; }                                                                               
-		case NODE_TRANSLATION_UNIT       : { pp_print_translation_unit_(node);       break; }                                                                                             
-		case NODE_TOP_LEVEL_DECLARATION  : { pp_print_top_level_declaration_(node);  break; }                                                                                                  
-		case NODE_DECLARATION            : { pp_print_declaration_(node);            break; }                                                                                                            
-		case NODE_DECLARATION_SPECIFIERS : { pp_print_declaration_specifiers_(node); break; }                                                                                                 
-		case NODE_TYPE_SPECIFIER         : { pp_print_type_specifier_(node);         break; }                                                                                                         
-		case NODE_INTEGER_TYPE_SPECIFIER : { pp_print_integer_type_specifier_(node); break; }    
-		case NODE_SIGNED_TYPE_SPECIFIER  : { pp_print_signed_type_specifier_(node);  break; }
-		case NODE_UNSIGNED_TYPE_SPECIFIER: { pp_print_unsigned_type_specifier_(node);break; }                                                                                             
-		case NODE_VOID_TYPE_SPECIFIER    : { pp_print_void_type_specifier_();        break; }                                                                                                    
-		case NODE_IDECL_LIST             : { pp_print_ideclarator_list_(node);       break; }                                                                                                             
-		case NODE_IDECLARATOR            : { pp_print_ideclarator_(node);            break; }                                                                                                            
-		case NODE_DECLARATOR             : { pp_print_declarator_(node);             break; }
-		case NODE_POINTER_DECLARATOR     : { pp_print_pointer_declarator_(node);     break; }
-		case NODE_DIRECT_DECLARATOR      : { pp_print_direct_declarator_(node);      break; }
-		case NODE_SIMPLE_DECLARATOR      : { pp_print_simple_declarator_(node);      break; } 
-		case NODE_IDENTIFIER             : { pp_print_identifier_(node);             break; }
-    case NODE_LITERAL_INTEGER        : { pp_print_literal_integer_(node);        break; }
-    case NODE_ARRAY_DECLARATOR       : { pp_print_array_declarator_(node);       break; }
-    case NODE_CONSTANT_EXPRESSION    : { pp_print_constant_expression_(node);    break; }  
-		default : break;
-	}
+    case NODE_ROOT                       : { pp_print_root_node_(node);                  break; }                                                                               
+		case NODE_TRANSLATION_UNIT           : { pp_print_translation_unit_(node);           break; }                                                                                             
+		case NODE_TOP_LEVEL_DECLARATION      : { pp_print_top_level_declaration_(node);      break; }                                                                                                  
+		case NODE_DECLARATION                : { pp_print_declaration_(node);                break; }                                                                                                            
+		case NODE_SIGNED_TYPE_SPECIFIER      : { pp_print_signed_type_specifier_(node);      break; }
+		case NODE_UNSIGNED_TYPE_SPECIFIER    : { pp_print_unsigned_type_specifier_(node);    break; }                                                                                             
+		case NODE_VOID_TYPE_SPECIFIER        : { pp_print_void_type_specifier_();            break; }                                                                                                    
+		case NODE_DECLARATOR_LIST            : { pp_print_declarator_list_(node);            break; }                                                                                                             
+		case NODE_POINTER_DECLARATOR         : { pp_print_pointer_declarator_(node);         break; }
+		case NODE_SIMPLE_DECLARATOR          : { pp_print_simple_declarator_(node);          break; } 
+		case NODE_IDENTIFIER                 : { pp_print_identifier_(node);                 break; }
+    case NODE_LITERAL_INTEGER            : { pp_print_literal_integer_(node);            break; }
+    case NODE_ARRAY_DECLARATOR           : { pp_print_array_declarator_(node);           break; }
+    case NODE_CONSTANT_EXPRESSION        : { pp_print_constant_expression_(node);        break; } 
+    case NODE_FUNCTION_DECLARATOR        : { pp_print_function_declarator_(node);        break; }
+    case NODE_PARAMETER_TYPE_LIST        : { pp_print_parameter_type_list_(node);        break; }
+    case NODE_PARAMETER_LIST             : { pp_print_parameter_list_(node);             break; }
+    case NODE_PARAMETER_DECLARATION      : { pp_print_parameter_declaration_(node);      break; } 
+    case NODE_ABSTRACT_DECLARATOR        : { pp_print_abstract_declarator_(node);        break; }
+    case NODE_DIRECT_ABSTRACT_DECLARATOR : { pp_print_direct_abstract_declarator_(node); break; }
+		default:
+      fprintf(stderr, "[ERROR]: Attempt to print unknown node, type:%i", node->node_type);
+      fputs("/*ERROR: Unknown node encountered.  Output terminated.*/", output_file);
+      return 1;
+  }
+  return 0;
 }

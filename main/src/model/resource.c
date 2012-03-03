@@ -101,4 +101,6 @@ void resource_init()
   RECORD_MESSAGE(ERROR_UNTERM_STR       , "Unterminated string");
   RECORD_MESSAGE(ERROR_BAD_CHAR_ESCAPE  , "Invalid character escape sequence.");
   RECORD_MESSAGE(ERROR_OUT_OF_MEMORY    , "Out of memory!");
+  
+  RECORD_MESSAGE(ERROR_FUNCTION_AS_FUNCTION_PARAMETER, "Function declarations not allowed as function parameters.");
 }

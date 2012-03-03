@@ -25,3 +25,7 @@ signed long signed_long;
 signed long int **p_2signed_long_int;
 unsigned long unsigned_long;
 unsigned long int ***p3_unsigned_long_int;
+
+int *x;
+int (*x);
+int *(x);
