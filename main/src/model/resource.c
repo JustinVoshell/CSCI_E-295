@@ -103,4 +103,12 @@ void resource_init()
   RECORD_MESSAGE(ERROR_OUT_OF_MEMORY    , "Out of memory!");
   
   RECORD_MESSAGE(ERROR_FUNCTION_AS_FUNCTION_PARAMETER, "Function declarations not allowed as function parameters.");
+  RECORD_MESSAGE(ERROR_ILLEGAL_VOID, "Void type specifiers can only be used to specify function declarations.");
+  RECORD_MESSAGE(ERROR_NO_VOID_POINTER, "'Pointer-to-void' types are not allowed.");
+  RECORD_MESSAGE(ERROR_INVALID_PARAMETER_LIST, "Function parameter list must either contain only 'void' or a list of valid parameter declarations.");
+  RECORD_MESSAGE(ERROR_NO_ARRAYS_OF_FUNCTIONS, "Arrays may not contain functions.");
+  RECORD_MESSAGE(ERROR_NO_POINTERS_TO_FUNCTIONS, "Pointers to functions are not allowed.");
+  RECORD_MESSAGE(ERROR_FUNCTIONS_CANNOT_RETURN_ARRAYS, "Functions may not return arrays.");
+  RECORD_MESSAGE(ERROR_FUNCTIONS_CANNOT_RETURN_FUNCTIONS, "Functions may not return functions.");
+  RECORD_MESSAGE(ERROR_INVALID_INCOMPLETE_ARRAY, "Only the leftmost dimension of an array declarator may be omitted.");
 }

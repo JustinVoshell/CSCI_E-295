@@ -20,7 +20,7 @@ enum node_type
 	NODE_POINTER,
 	NODE_DIRECT_DECLARATOR,
 	NODE_SIMPLE_DECLARATOR,
-	NODE_IDENTIFIER, 
+  NODE_IDENTIFIER,
 	NODE_LITERAL_STRING,
 	NODE_LITERAL_INTEGER,
 	NODE_ERROR,
@@ -50,7 +50,7 @@ struct node
 		struct string_data *string_data;
 	} data;
 };
-   
+
 struct node *node_basic(enum node_type node_type);
 struct node *node_int(enum node_type node_type, int value);
 struct node *node_cstring(enum node_type node_type, const char *value);
@@ -60,10 +60,20 @@ struct node *node_literal_integer(enum node_type node_type, struct integer_data 
 struct node *node_literal_string(enum node_type node_type, struct string_data *string_data);
 struct node *node_error(enum error_type error_type);
 
+int node_is(enum node_type node_type, struct node *test_node);
 
-int node_is_function_declarator(struct node *declarator);
+enum node_should_dereference_pointer
+{
+  NODE_DONT_DEREF_POINTER,
+  NODE_DEREF_POINTER
+};
+
+int node_is_function_declarator(struct node *declarator, enum node_should_dereference_pointer deref);
+int nodes_are_function_declarators(struct node *declarator_list, enum node_should_dereference_pointer deref);
+int node_is_valid_parameter_list(struct node *list_node, struct node *parameter_declaration);
 struct node *node_pointer_declarator(struct node *pointer, struct node *declarator);
 struct node *node_consolidate_pointers(struct node *pointer, struct node *pointer_declarator);
 struct node *node_unary_list_head(struct node *unary_node);
+struct node *node_declaration(struct node *type_specifier, struct node *declarator);
 
 #endif /*NODE_H_JHV9902116*/

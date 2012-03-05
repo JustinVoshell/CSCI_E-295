@@ -88,20 +88,22 @@ void pp_print_declarator_list_(struct node *ideclarator_list)
 
 void pp_print_pointer_to_(struct node *pointer, struct node *node)
 {
-	fputs("*", output_file);
-	
 	if (pointer->data.child)
   {
-    fputs("(", output_file);
+    fputs("(*", output_file);
 		pp_print_pointer_to_(pointer->data.child, node);
     fputs(")", output_file);
 	}
 	else if (node)
   {
-    fputs("(", output_file);
+    fputs("(*", output_file);
     pp_print(node);
     fputs(")", output_file);
   }
+	else
+	{
+		fputs("(*)", output_file);
+	}
 }	    
 	            
 void pp_print_pointer_declarator_(struct node *pointer_declarator)
@@ -139,11 +141,12 @@ void pp_print_array_declarator_(struct node* array_declarator)
 }
 
 void pp_print_function_declarator_(struct node* function_declarator)
-{
+{ 
+  fputs("(", output_file);
   pp_print(function_declarator->data.children[0]);
   fputs("(", output_file);
   pp_print(function_declarator->data.children[1]);
-  fputs(")", output_file);
+  fputs("))", output_file);
 }
 
 void pp_print_parameter_type_list_(struct node* parameter_type_list)
@@ -180,11 +183,12 @@ void pp_print_abstract_declarator_(struct node* abstract_declarator)
 }
 
 void pp_print_direct_abstract_declarator_(struct node* direct_abstract_declarator)
-{
+{         
+  fputs("(", output_file);
   if (direct_abstract_declarator->data.children[0]) pp_print(direct_abstract_declarator->data.children[0]);
   fputs("[", output_file);
-  pp_print(direct_abstract_declarator->data.children[1]);
-  fputs("]", output_file);
+  if (direct_abstract_declarator->data.children[1]) pp_print(direct_abstract_declarator->data.children[1]);
+  fputs("])", output_file);
 }
 
 int pp_print(struct node *node)                                                                     

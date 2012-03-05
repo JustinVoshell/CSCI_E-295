@@ -88,18 +88,49 @@ root                                   : translation_unit                       
                                        ;
 
 abstract_declarator                    : pointer                                                                       { $$ = node_binary(NODE_ABSTRACT_DECLARATOR, $1,  0); }
-                                       | direct_abstract_declarator                                                    { $$ = node_binary(NODE_ABSTRACT_DECLARATOR,  0, $1); }        
+                                       | direct_abstract_declarator                                                    { $$ = $1 }        
                                        | pointer direct_abstract_declarator                                            { $$ = node_binary(NODE_ABSTRACT_DECLARATOR, $1, $2); }
                                        ;
 
-array_declarator                       : direct_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET              { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1, $3); }
-                                       | direct_declarator LEFT_BRACKET RIGHT_BRACKET                                  { $$ = node_binary(NODE_ARRAY_DECLARATOR, $1,  0); }
+array_declarator                       : direct_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET              { if (node_is(NODE_FUNCTION_DECLARATOR, $1)) 
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_FUNCTIONS_CANNOT_RETURN_ARRAYS));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_ARRAY_DECLARATOR, $1, $3);
+                                                                                                                       }
+                                       | direct_declarator LEFT_BRACKET RIGHT_BRACKET                                  {
+                                                                                                                         if (node_is(NODE_FUNCTION_DECLARATOR, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_FUNCTIONS_CANNOT_RETURN_ARRAYS));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         if (node_is(NODE_ARRAY_DECLARATOR, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_INVALID_INCOMPLETE_ARRAY));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_ARRAY_DECLARATOR, $1,  0); 
+                                                                                                                       } 
                                        ;
 
 constant_expression                    : LITERAL_NUMBER                                                                { $$ = node_unary(NODE_CONSTANT_EXPRESSION, $1);   }
                                        ;
              
-declaration                            : type_specifier declarator_list SEMICOLON                                      { $$ = node_binary(NODE_DECLARATION, $1, $2);        }
+declaration                            : type_specifier declarator_list SEMICOLON                                      { if (node_is(NODE_VOID_TYPE_SPECIFIER, $1))
+                                                                                                                         {
+                                                                                                                           if (node_is(NODE_POINTER_DECLARATOR, $1))
+                                                                                                                           {
+                                                                                                                             yyerror(resource(ERROR_NO_VOID_POINTER));
+                                                                                                                             YYERROR;
+                                                                                                                           }
+                                                                                                                           if (!nodes_are_function_declarators($2, NODE_DONT_DEREF_POINTER))
+                                                                                                                           {
+                                                                                                                             yyerror(resource(ERROR_ILLEGAL_VOID));
+                                                                                                                             YYERROR;
+                                                                                                                           }
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_DECLARATION, $1, $2); }
                                        | error SEMICOLON
                                        ;
 
@@ -114,7 +145,15 @@ declarator_list                        : declarator                             
 direct_abstract_declarator             : LEFT_PAREN abstract_declarator RIGHT_PAREN                                    { $$ = $2 }
                                        | LEFT_BRACKET constant_expression RIGHT_BRACKET                                { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR,  0, $2); }
                                        | direct_abstract_declarator LEFT_BRACKET constant_expression RIGHT_BRACKET     { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR, $1, $3); }
-                                       | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET                         { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR, $1,  0); }
+                                       | direct_abstract_declarator LEFT_BRACKET RIGHT_BRACKET                         {  
+                                                                                                                         if (node_is(NODE_DIRECT_ABSTRACT_DECLARATOR, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_INVALID_INCOMPLETE_ARRAY));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR, $1,  0); 
+                                                                                                                       }
+                                       | LEFT_BRACKET RIGHT_BRACKET                                                    { $$ = node_binary(NODE_DIRECT_ABSTRACT_DECLARATOR,  0,  0); }
                                        ;                                                                             
 
 direct_declarator                      : simple_declarator                                                             { $$ = $1 }
@@ -123,26 +162,62 @@ direct_declarator                      : simple_declarator                      
                                        | array_declarator                                                              { $$ = $1 }
                                        ;
 
-function_declarator                    : direct_declarator LEFT_PAREN parameter_type_list RIGHT_PAREN                  { $$ = node_binary(NODE_FUNCTION_DECLARATOR, $1, $3); }
+function_declarator                    : direct_declarator LEFT_PAREN parameter_type_list RIGHT_PAREN                  { 
+                                                                                                                         if (node_is(NODE_ARRAY_DECLARATOR, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_NO_ARRAYS_OF_FUNCTIONS));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         if (node_is(NODE_POINTER_DECLARATOR, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_NO_POINTERS_TO_FUNCTIONS));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         if (node_is(NODE_FUNCTION_DECLARATOR, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_FUNCTIONS_CANNOT_RETURN_FUNCTIONS));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_FUNCTION_DECLARATOR, $1, $3);
+                                                                                                                       }
                                        ;
 
 integer_type_specifier                 : signed_type_specifier                                                         { $$ = $1 }
                                        | unsigned_type_specifier                                                       { $$ = $1 }
                                        ;
 
-parameter_declaration                  : type_specifier declarator                                                     { if (node_is_function_declarator($2))
+parameter_declaration                  : type_specifier declarator                                                     { 
+                                                                                                                         if (node_is(NODE_VOID_TYPE_SPECIFIER, $1))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_ILLEGAL_VOID));
+                                                                                                                           YYERROR;
+                                                                                                                         } 
+                                                                                                                         else if (node_is_function_declarator($2, NODE_DEREF_POINTER))
                                                                                                                          { 
                                                                                                                            yyerror(resource(ERROR_FUNCTION_AS_FUNCTION_PARAMETER));
                                                                                                                            YYERROR;
                                                                                                                          }
-                                                                                                                         else $$ = node_binary(NODE_PARAMETER_DECLARATION, $1, $2);
+                                                                                                                         $$ = node_binary(NODE_PARAMETER_DECLARATION, $1, $2);
                                                                                                                        }
                                        | type_specifier                                                                { $$ = node_binary(NODE_PARAMETER_DECLARATION, $1,  0); }
-                                       | type_specifier abstract_declarator                                            { $$ = node_binary(NODE_PARAMETER_DECLARATION, $1, $2); }
+                                       | type_specifier abstract_declarator                                            { 
+                                                                                                                         if (node_is(NODE_VOID_TYPE_SPECIFIER, $1)) 
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_ILLEGAL_VOID));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_PARAMETER_DECLARATION, $1, $2);
+                                                                                                                       }
                                        ;
 
 parameter_list                         : parameter_declaration                                                         { $$ = node_binary(NODE_PARAMETER_LIST,  0, $1); }
-                                       | parameter_list SEQUENTIAL_EVAL parameter_declaration                          { $$ = node_binary(NODE_PARAMETER_LIST, $1, $3); }
+                                       | parameter_list SEQUENTIAL_EVAL parameter_declaration                          { if (!node_is_valid_parameter_list($1, $3))
+                                                                                                                         {
+                                                                                                                           yyerror(resource(ERROR_INVALID_PARAMETER_LIST));
+                                                                                                                           YYERROR;
+                                                                                                                         }
+                                                                                                                         $$ = node_binary(NODE_PARAMETER_LIST, $1, $3); 
+                                                                                                                       }
                                        ;
 
 parameter_type_list                    : parameter_list                                                                { $$ = node_unary(NODE_PARAMETER_TYPE_LIST, $1); }
@@ -179,7 +254,6 @@ top_level_declaration                  : declaration                            
 
 translation_unit                       : top_level_declaration                                                         { $$ = node_binary(NODE_TRANSLATION_UNIT,  0, $1);   }
                                        | translation_unit top_level_declaration                                        { $$ = node_binary(NODE_TRANSLATION_UNIT, $1, $2);   }
-                                       | error
                                        ;
 
 type_specifier                         : integer_type_specifier                                                        { $$ = $1 }

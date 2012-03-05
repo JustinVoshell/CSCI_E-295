@@ -67,17 +67,42 @@ struct node *node_error(enum error_type error_type)
 	return new_node;
 }
 
-int node_is_function_declarator(struct node *declarator)
+int node_is(enum node_type node_type, struct node *test_node)
+{
+  return (test_node && test_node->node_type == node_type);
+}
+
+int node_is_function_declarator(struct node *declarator, enum node_should_dereference_pointer deref)
 {
   if (!declarator) return 0;
   
-  if (declarator->node_type == NODE_POINTER_DECLARATOR) declarator = declarator->data.children[1];
-    return (declarator && declarator->node_type == NODE_FUNCTION_DECLARATOR) ? 1: 0;
+  if (node_is(NODE_POINTER_DECLARATOR, declarator) && deref == NODE_DEREF_POINTER)
+  {
+    declarator = declarator->data.children[1];
+  }
+  return node_is(NODE_FUNCTION_DECLARATOR, declarator);
+}
+
+int nodes_are_function_declarators(struct node *declarator_list, enum node_should_dereference_pointer deref)
+{
+  while(declarator_list)
+  {
+    if (!node_is_function_declarator(declarator_list->data.children[1], deref)) return 0;
+    declarator_list = declarator_list->data.children[0];
+  }
+  return 1;
+}
+
+int node_is_valid_parameter_list(struct node *list_node, struct node *parameter_declaration)
+{
+  if (node_is(NODE_VOID_TYPE_SPECIFIER, parameter_declaration->data.children[0])) return 0;
+  if (node_is(NODE_VOID_TYPE_SPECIFIER, list_node->data.children[1]->data.children[0])) return 0;
+  return 1;
 }
 
 struct node *node_pointer_declarator(struct node *pointer, struct node *declarator)
 {
-  if (declarator->node_type == NODE_POINTER_DECLARATOR)
+  if (node_is(NODE_POINTER_DECLARATOR, declarator))
     return node_consolidate_pointers(pointer, declarator);
     
   return node_binary(NODE_POINTER_DECLARATOR, pointer, declarator);

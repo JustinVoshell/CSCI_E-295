@@ -71,6 +71,7 @@ scanner.o: CPPFLAGS += -DSTANDALONE_SCANNER
 scanner_printer.o: scanner_printer.h $(SCANNER_OBJECTS) $(MODEL_INCLUDES)
 scanner_printer.o: CPPFLAGS += -DSTANDALONE_SCANNER
 
-parser: parser_printer.o $(PARSER_OBJECTS)
-parser.o: parser_printer.h $(PARSER_OBJECTS) $(MODEL_INCLUDES) parse.h
+parser: parser_printer.o debug_printer.o $(PARSER_OBJECTS)
+parser.o: parser_printer.h debug_printer.h $(PARSER_OBJECTS) $(MODEL_INCLUDES) parse.h
 parser_printer.o: parser_printer.h $(PARSER_OBJECTS) $(MODEL_INCLUDES) parse.h
+debug_printer.o: debug_printer.h $(PARSER_OBJETS) $(MODEL_INCLUDES) parse.h

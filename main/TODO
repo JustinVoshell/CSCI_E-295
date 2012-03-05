@@ -1,1 +1,3 @@
-- Disallow void type specifiers for type specifiers used anywhere except function declarations and in lieu of parameter lists.
+- input like this: int[];  gives an error once, but not on subsequent passes.  very odd.
+  figure out after project has been graded.
+  
